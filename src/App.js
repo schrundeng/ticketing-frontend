@@ -6,7 +6,7 @@ import Login from './pages/login2.js';
 function App() {
   return (
     <div className="App">
-      <Login/>
+      <SignIn/>
     </div>
   );
 }
