@@ -6,7 +6,8 @@ import SignIn from './pages/login.js';
 import Sidebar from './pages/dashboard/sidebarAdmin.js';
 import Dashboard from './pages/dashboard/dashboard.js';
 import Navbar from './pages/dashboard/navbar.js';
-import TicketPage from './pages/ticket/ticket.js'; // Import the TicketPage if you have it
+import TicketPage from './pages/ticket/ticket.js';
+import Pengelola from './pages/pengelola/pengelola.js';
 
 function App() {
   return (
@@ -19,6 +20,15 @@ function App() {
             <div className="flex flex-col flex-1">
               <Navbar />
               <Dashboard />
+            </div>
+          </div>
+        } />
+        <Route path="/pengelola" element={
+          <div className="flex h-screen">
+            <Sidebar />
+            <div className="flex flex-col flex-1">
+              <Navbar />
+              <Pengelola />
             </div>
           </div>
         } />
