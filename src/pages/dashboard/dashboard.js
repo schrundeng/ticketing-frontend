@@ -1,4 +1,7 @@
+// src/components/Dashboard.js
+
 import React from 'react';
+import PieChart from './chart'; // Import your pie chart component
 
 const Dashboard = () => {
   return (
@@ -30,9 +33,8 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4">Total Revenue</h2>
-        {/* Placeholder for chart */}
-            <img src='' className="h-48 bg-gray-200 rounded-lg"/>
+        <h2 className="text-xl font-bold mb-4">Revenue Distribution</h2>
+        <PieChart />
       </div>
     </div>
   );

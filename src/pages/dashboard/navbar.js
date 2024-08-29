@@ -1,9 +1,13 @@
+// src/pages/dashboard/navbar.js
+
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faEnvelope, faSignOutAlt, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const toggleDropdown = () => {
     setDropdownOpen(prev => !prev);
@@ -22,6 +26,11 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleLogout = () => {
+    // You can add any logout logic here if needed
+    navigate('/'); // Redirect to the login page
+  };
 
   return (
     <div className="flex items-center justify-between bg-white p-4 shadow-md relative">
@@ -71,7 +80,10 @@ const Navbar = () => {
               aria-hidden={!dropdownOpen}
             >
               <ul className="py-2">
-                <li className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                <li 
+                  className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleLogout} // Add click handler
+                >
                   <FontAwesomeIcon icon={faSignOutAlt} className="mr-2 text-gray-600" />
                   Log Out
                 </li>
