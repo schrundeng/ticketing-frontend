@@ -1,9 +1,5 @@
-// src/components/PengelolaTable.js
-
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
-import Button from '@mui/material/Button';
-import styles from './pengelola.module.css'; 
 
 const PengelolaTable = () => {
   // Sample data
@@ -44,46 +40,46 @@ const PengelolaTable = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100">
+    <div className="p-6 bg-gray-100 flex-1">
       <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">Pengelola Users</h2>
-        <Button
+        <h2 className="text-2xl font-bold mb-4">Pengelola Users</h2>
+        <button
           onClick={() => handleOpen()}
-          className={`${styles.button} ${styles.buttonBlue} mb-4`}
+          className="mb-4 bg-blue-500 text-white hover:bg-blue-600 py-2 px-4 rounded"
         >
           Add New User
-        </Button>
-        <table className="w-full table-auto border-collapse mb-4 mt-4">
+        </button>
+        <table className="w-full table-auto border-collapse">
           <thead>
-            <tr className="bg-gray-200 text-gray-600">
-              <th className="p-2 border-b text-left">ID</th>
-              <th className="p-2 border-b text-left">Username</th>
-              <th className="p-2 border-b text-left">Email</th>
-              <th className="p-2 border-b text-left">Role</th>
-              <th className="p-2 border-b text-left">Actions</th>
+            <tr className="bg-gray-200 text-gray-700 border-b">
+              <th className="p-3 text-left">ID</th>
+              <th className="p-3 text-left">Username</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Role</th>
+              <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map(user => (
-              <tr key={user.id}>
-                <td className="p-2 border-b text-left">{user.id}</td>
-                <td className="p-2 border-b text-left">{user.username}</td>
-                <td className="p-2 border-b text-left">{user.email}</td>
-                <td className="p-2 border-b text-left">{user.role}</td>
-                <td className="p-2 border-b text-left">
+              <tr key={user.id} className="border-b hover:bg-gray-50">
+                <td className="p-3">{user.id}</td>
+                <td className="p-3">{user.username}</td>
+                <td className="p-3">{user.email}</td>
+                <td className="p-3">{user.role}</td>
+                <td className="p-3">
                   <div className="flex space-x-2">
-                    <Button
+                    <button
                       onClick={() => handleOpen(user)}
-                      className={`${styles.button} ${styles.buttonBlue}`}
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     >
                       Edit
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => handleDeleteUser(user.id)}
-                      className={`${styles.button} ${styles.buttonRed}`}
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
                     >
                       Delete
-                    </Button>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -100,8 +96,7 @@ const PengelolaTable = () => {
         >
           <DialogTitle
             id="modal-title"
-            sx={{ backgroundColor: '#f3f4f6', color: '#111827' }} // Custom colors can be applied via inline styles if needed
-            className="text-lg font-semibold"
+            className="bg-gray-100 text-gray-900 text-lg font-semibold"
           >
             {editingUser ? 'Edit User' : 'Add New User'}
           </DialogTitle>
@@ -134,18 +129,18 @@ const PengelolaTable = () => {
             </div>
           </DialogContent>
           <DialogActions>
-            <Button
+            <button
               onClick={handleClose}
-              className={`${styles.button} ${styles.buttonGray}`}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
             >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               onClick={editingUser ? handleSaveUser : handleAddUser}
-              className={`${styles.button} ${styles.buttonBlue}`}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               {editingUser ? 'Save Changes' : 'Add User'}
-            </Button>
+            </button>
           </DialogActions>
         </Dialog>
       </div>

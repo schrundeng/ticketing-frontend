@@ -6,7 +6,7 @@ import SignIn from './pages/login.js';
 import Sidebar from './pages/dashboard/sidebarAdmin.js';
 import Dashboard from './pages/dashboard/dashboard.js';
 import Navbar from './pages/dashboard/navbar.js';
-import TicketPage from './pages/ticket/ticket.js';
+import TicketTable from './pages/ticket/table.js';
 import Pengelola from './pages/pengelola/pengelola.js';
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
             <Sidebar />
             <div className="flex flex-col flex-1">
               <Navbar />
-              <TicketPage />
+              <TicketTable />
             </div>
           </div>
         } />

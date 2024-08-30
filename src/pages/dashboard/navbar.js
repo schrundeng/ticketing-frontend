@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faEnvelope, faSignOutAlt, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faSignOutAlt, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -47,9 +47,6 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         {/* Icons */}
         <div className="flex items-center space-x-2">
-          <button className="bg-gray-200 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <FontAwesomeIcon icon={faBell} />
-          </button>
           <button className="bg-gray-200 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <FontAwesomeIcon icon={faEnvelope} />
           </button>
