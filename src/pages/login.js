@@ -29,22 +29,31 @@ const defaultTheme = createTheme();
 
 export default function SignInSide() {
   const navigate = useNavigate(); // Initialize useNavigate
+  const [error, setError] = React.useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email');
+    const password = data.get('password');
 
-    // Redirect to the Dashboard page
-    navigate('/dashboard');
+    if (email && password) {
+      console.log({
+        email,
+        password,
+      });
+
+      // Redirect to the Dashboard page
+      navigate('/dashboard');
+    } else {
+      // Set the error message if fields are not filled out
+      setError('Please fill out both email and password fields.');
+    }
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Grid container component="main" sx={{ height: '100vh' }}>
+      <Grid container component="main" sx={{ height: '100vh', overflow: 'hidden' }}>
         <CssBaseline />
         <Grid
           item
@@ -58,20 +67,31 @@ export default function SignInSide() {
               t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
             backgroundSize: 'cover',
             backgroundPosition: 'left',
+            backgroundRepeat: 'no-repeat',
+            height: '100%', // Ensures the background covers the full height
           }}
         />
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
           <Box
             sx={{
-              my: 40,
+              my: 8, // Adjust margins to prevent overflow
               mx: 4,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
             }}
           >
+            {/* Logo and Title */}
+            <div className="flex items-center text-white mb-10">
+              <img 
+                src='https://um.ac.id/wp-content/uploads/2020/08/cropped-Lambang-UM-300x300.png' 
+                alt="Logo" 
+                className="w-32 h-32" 
+              />
+              <div className="ml-4 font-poppins text-black text-3xl font-bold">Lapor-UM</div> {/* Changed text size */}
+            </div>
             <Typography component="h1" variant="h5">
-              Sign in
+              Login
             </Typography>
             <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
               <TextField
@@ -94,6 +114,11 @@ export default function SignInSide() {
                 id="password"
                 autoComplete="current-password"
               />
+              {error && (
+                <Typography color="error" sx={{ mt: 2 }}>
+                  {error}
+                </Typography>
+              )}
               <Button
                 type="submit"
                 fullWidth

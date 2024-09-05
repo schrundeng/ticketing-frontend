@@ -45,7 +45,7 @@ const PengelolaTable = () => {
         <h2 className="text-2xl font-bold mb-4">Pengelola Users</h2>
         <button
           onClick={() => handleOpen()}
-          className="mb-4 bg-blue-500 text-white hover:bg-blue-600 py-2 px-4 rounded"
+          className="mb-4 bg-blue-500 text-white hover:bg-blue-600 py-2 px-4 rounded-lg"
         >
           Add New User
         </button>
@@ -70,13 +70,13 @@ const PengelolaTable = () => {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleOpen(user)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteUser(user.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                     >
                       Delete
                     </button>
