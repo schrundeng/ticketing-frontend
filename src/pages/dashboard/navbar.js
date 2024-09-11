@@ -3,11 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faSignOutAlt, faChevronDown, faTachometerAlt, faUsers, faTicketAlt, faBars } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
-const CombinedNavbarSidebar = () => {
+const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Initially open the sidebar on larger screens
   const navigate = useNavigate();
-  const location = useLocation(); // Get current route
+  const location = useLocation();
 
   const toggleDropdown = () => {
     setDropdownOpen(prev => !prev);
@@ -18,17 +17,20 @@ const CombinedNavbarSidebar = () => {
   };
 
   const handleClickOutside = (e) => {
-    if (!e.target.closest('.dropdown-container')) {
-      setDropdownOpen(false);
+    if (sidebarOpen && !e.target.closest('.sidebar') && !e.target.closest('.menu-icon')) {
+      setSidebarOpen(false); // Close sidebar only if it's open
     }
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    // Add the click event listener when the sidebar is open
+    if (sidebarOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [sidebarOpen]);
 
   const handleLogout = () => {
     navigate('/'); // Redirect to the login page
@@ -40,23 +42,14 @@ const CombinedNavbarSidebar = () => {
       <div style={{ backgroundColor: '#FFA300', zIndex: 40 }} className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md">
         {/* Menu Icon */}
         <button
-          className="md:hidden text-gray-600 focus:outline-none"
+          className="md:hidden text-gray-600 focus:outline-none menu-icon"
           onClick={toggleSidebar}
         >
           <FontAwesomeIcon icon={faBars} size="lg" />
         </button>
 
-        {/* Left Side: Search Bar */}
-        <div className="flex items-center">
-          <input 
-            type="text" 
-            placeholder="Type to search..." 
-            className="bg-gray-100 ml-72 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
-          />
-        </div>
-
         {/* Right Side: User Info and Icons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 ml-auto">
           {/* Icons */}
           <div className="flex items-center space-x-2">
             <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -106,8 +99,15 @@ const CombinedNavbarSidebar = () => {
       {/* Sidebar */}
       <div 
         style={{ backgroundColor: '#264262', zIndex: 40 }} 
-        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:w-72`}
+        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 sidebar ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:block md:w-72`}
       >
+        <button
+          className="absolute top-4 right-4 md:hidden text-gray-600 focus:outline-none menu-icon"
+          onClick={toggleSidebar}
+        >
+          <FontAwesomeIcon icon={faBars} size="lg" />
+        </button>
+
         <div className="flex items-center text-white mb-10">
           <img 
             src='https://um.ac.id/wp-content/uploads/2020/08/cropped-Lambang-UM-300x300.png' 
