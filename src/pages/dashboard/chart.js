@@ -32,7 +32,7 @@ const PieChart = () => {
               color: 'black',
               offsetY: -20,
               formatter: function (val) {
-                return val + "%";
+                return val;
               }
             },
             total: {
@@ -43,7 +43,7 @@ const PieChart = () => {
               formatter: function (w) {
                 return w.globals.seriesTotals.reduce((a, b) => {
                   return a + b
-                }, 0) + "%";
+                }, 0);
               }
             }
           }
@@ -53,7 +53,7 @@ const PieChart = () => {
     tooltip: {
       y: {
         formatter: function (val) {
-          return val + "%";
+          return val;
         }
       }
     }
