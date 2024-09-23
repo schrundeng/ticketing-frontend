@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios'; // Import axios
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -10,7 +11,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
   return (
@@ -31,25 +32,64 @@ export default function SignInSide() {
   const navigate = useNavigate(); // Initialize useNavigate
   const [error, setError] = React.useState('');
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = data.get('email');
+    const id = data.get('id'); // Fetch the ID (user or operator)
     const password = data.get('password');
-
-    if (email && password) {
-      console.log({
-        email,
-        password,
-      });
-
-      // Redirect to the Dashboard page
-      navigate('/dashboard');
+  
+    if (id && password) {
+      try {
+        let apiUrl = '';
+        let requestBody = {};
+  
+        if (id.length === 12) {
+          // User role (id_user)
+          apiUrl = 'http://localhost:8000/api/loginUser';
+          requestBody = {
+            id_user: id,
+            password: password,
+          };
+        } else if (id.length === 18) {
+          // Operator role (id_pengelola)
+          apiUrl = 'http://localhost:8000/api/loginPengelola';
+          requestBody = {
+            id_pengelola: id,
+            password: password,
+          };
+        } else {
+          setError('Invalid ID length.');
+          return;
+        }
+  
+        const response = await axios.post(apiUrl, requestBody);
+  
+        if (response.status === 200) {
+          // Save token to local storage
+          localStorage.setItem('token', response.data.token); // Adjust according to your API response
+  
+          // Redirect based on role
+          if (id.length === 12) {
+            navigate('/form');
+          } else if (id.length === 18) {
+            navigate('/dashboard');
+          }
+        } else {
+          setError('Login failed. Please check your credentials.');
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          setError('Wrong ID or password.');
+        } else {
+          console.error('Error during login:', error);
+          setError('An error occurred. Please try again later.');
+        }
+      }
     } else {
-      // Set the error message if fields are not filled out
-      setError('Please fill out both email and password fields.');
+      setError('Please fill out both ID and password fields.');
     }
   };
+  
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -88,7 +128,7 @@ export default function SignInSide() {
                 alt="Logo" 
                 className="w-32 h-32" 
               />
-              <div className="ml-4 font-poppins text-black text-3xl font-bold">Lapor-UM</div> {/* Changed text size */}
+              <div className="ml-4 font-poppins text-black text-3xl font-bold">Lapor-UM</div>
             </div>
             <Typography component="h1" variant="h5">
               Login
@@ -98,10 +138,10 @@ export default function SignInSide() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+                id="id"
+                label="ID Number"
+                name="id"
+                autoComplete="id"
                 autoFocus
               />
               <TextField
@@ -127,16 +167,14 @@ export default function SignInSide() {
               >
                 Sign In
               </Button>
-              <Grid container>
+              <Grid container justifyContent="space-between" alignItems="center">
                 <FormControlLabel
                   control={<Checkbox value="remember" color="primary" />}
                   label="Remember me"
                 />
-                <Grid item marginLeft={35}>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
               </Grid>
               <Copyright sx={{ mt: 5 }} />
             </Box>
