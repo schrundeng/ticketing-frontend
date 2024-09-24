@@ -1,9 +1,11 @@
+// src/components/CombinedNavbarSidebarOperator.js
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faSignOutAlt, faChevronDown, faTachometerAlt, faUsers, faTicketAlt, faBars } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faSignOutAlt, faChevronDown, faTicketAlt, faBars, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import Message from '../message'; // Import the Message component
 
-const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,7 +25,6 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   useEffect(() => {
-    // Add the click event listener when the sidebar is open
     if (sidebarOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
@@ -50,13 +51,19 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
+          {/* Icons */}
+          <div className="flex items-center space-x-2">
+            <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <FontAwesomeIcon icon={faEnvelope} />
+            </button>
+          </div>
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
                 <p className="font-semibold">Makoto Alghifari</p>
-                <p className="text-sm text-right">Admin datang</p>
+                <p className="text-sm text-right">Operator</p>
               </div>
               <img 
                 src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg" 
@@ -106,28 +113,22 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <img 
             src='https://um.ac.id/wp-content/uploads/2020/08/cropped-Lambang-UM-300x300.png' 
             alt="Logo" 
-            className="w-24 h-24"  // Increase logo size
+            className="w-24 h-24"
           />
           <div className="ml-4 text-2xl font-bold">Lapor-UM</div>
         </div>
         <ul className="text-gray-300">
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/dashboard' ? 'bg-[#213751] text-white rounded-lg' : ''}`}>
+          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/ticketop' ? 'bg-[#213751]  text-white rounded-lg' : ''}`}>
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
-              <FontAwesomeIcon icon={faTachometerAlt} size="lg" />  {/* Make icon larger */}
+              <FontAwesomeIcon icon={faTicketAlt} size="lg" />
             </button>
-            <Link to="/dashboard" className={`ml-3 ${location.pathname === '/dashboard' ? 'font-semibold' : ''}`}>Dashboard</Link>
+            <Link to="/ticketop" className={`ml-3 ${location.pathname === '/ticketop' ? 'font-semibold' : ''}`}>Ticket</Link>
           </li>
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/pengelola' ? 'bg-[#213751] text-white rounded-lg' : ''}`}>
+          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/message' ? 'bg-[#213751] text-white rounded-lg' : ''}`}>
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
-              <FontAwesomeIcon icon={faUsers} size="lg" />  {/* Make icon larger */}
+              <FontAwesomeIcon icon={faCommentDots} size="lg" />
             </button>
-            <Link to="/pengelola" className={`ml-3 ${location.pathname === '/pengelola' ? 'font-semibold' : ''}`}>Pengelola</Link>
-          </li>
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/ticket' ? 'bg-[#213751]  text-white rounded-lg' : ''}`}>
-            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
-              <FontAwesomeIcon icon={faTicketAlt} size="lg" />  {/* Make icon larger */}
-            </button>
-            <Link to="/ticket" className={`ml-3 ${location.pathname === '/ticket' ? 'font-semibold' : ''}`}>Ticket</Link>
+            <Link to="/message" className={`ml-3 ${location.pathname === '/message' ? 'font-semibold' : ''}`}>Message</Link>
           </li>
         </ul>
       </div>
@@ -135,4 +136,4 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-export default CombinedNavbarSidebar;
+export default CombinedNavbarSidebarOperator;
