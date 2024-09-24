@@ -16,7 +16,11 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   const handleLogout = () => {
-    navigate("/"); // Redirect to the login page
+    // Remove the token from localStorage
+    localStorage.removeItem("token");
+
+    // Redirect to the login page
+    navigate("/");
   };
 
   return (
@@ -27,7 +31,7 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
         <div className="flex items-center space-x-">
-          <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" >
+          <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <FontAwesomeIcon icon={faEnvelope} />
           </button>
         </div>
