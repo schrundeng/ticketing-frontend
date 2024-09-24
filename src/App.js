@@ -7,7 +7,7 @@ import TicketTable from './pages/ticket/table.js';
 import Pengelola from './pages/pengelola/pengelola.js';
 import Form from './pages/user/form.js';
 import CombinedNavbarSidebarOperator from './pages/dashboard/navbarOP.js';
-import Message from './pages/message.js';
+import ChatPage from './pages/user/chat.js';
 import { useState } from 'react';
 
 function App() {
@@ -64,11 +64,11 @@ function App() {
             </div>
           </div>
         } />
-        <Route path="/message" element={
+        <Route path="/chat" element={
           <div className="flex h-screen">
             <CombinedNavbarSidebarOperator sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <div className={`flex flex-col flex-1 mt-16 transition-all duration-300 ${sidebarOpen ? 'ml-72 max-w-[calc(100%-18rem)]' : 'ml-0 max-w-full'}`}> {/* Dynamic margin-left */}
-              <Message />
+              <ChatPage />
             </div>
           </div>
         } />
