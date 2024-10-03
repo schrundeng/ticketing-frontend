@@ -7,6 +7,8 @@ import TicketTable from "./pages/ticket/table.js";
 import Pengelola from "./pages/pengelola/pengelola.js";
 import Form from "./pages/user/form.js";
 import ChatPage from "./pages/user/chat.js";
+import CombinedNavbarSidebarOperator from "./pages/dashboard/navbarOP.js";
+import Message from "./pages/message.js";
 import PrivateRoute from "./pages/components/PrivateRoute.js"; // Import the PrivateRoute
 import { useState } from "react";
 
@@ -121,6 +123,56 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/ticketop"
+          element={
+              <div className="flex h-screen">
+                <CombinedNavbarSidebarOperator
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                />
+                <div
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
+                  }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
+                >
+                  <div className="w-full p-3 overflow-x-auto">
+                    <TicketTable />
+                  </div>
+                </div>
+              </div>
+          }
+        />
+        <Route
+          path="/message"
+          element={
+              <div className="flex h-screen">
+                <CombinedNavbarSidebarOperator
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                />
+                <div
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
+                  }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
+                >
+                  <div className="w-full p-3 overflow-x-auto">
+                    <Message />
+                  </div>
+                </div>
+              </div>
+          }
+        />
+
       </Routes>
     </Router>
   );
