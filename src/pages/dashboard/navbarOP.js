@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faSignOutAlt, faChevronDown, faTicketAlt, faBars, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import Message from '../message'; // Import the Message component
 
 const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -11,27 +10,28 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
   const toggleDropdown = () => {
-    setDropdownOpen(prev => !prev);
+    setDropdownOpen((prev) => !prev);
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
-  };
-
-  const handleClickOutside = (e) => {
-    if (sidebarOpen && !e.target.closest('.sidebar') && !e.target.closest('.menu-icon')) {
-      setSidebarOpen(false); // Close sidebar only if it's open
-    }
-  };
-
+  // Check window width to set default sidebar state
   useEffect(() => {
-    if (sidebarOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+    const handleResize = () => {
+      if (window.innerWidth < 728) {
+        setSidebarOpen(false); // Close sidebar on mobile by default
+      } else {
+        setSidebarOpen(true); // Open sidebar on larger screens
+      }
     };
-  }, [sidebarOpen]);
+
+    // Set initial sidebar state on load
+    handleResize();
+
+    // Add event listener on window resize
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [setSidebarOpen]);
 
   const handleLogout = () => {
     navigate('/'); // Redirect to the login page
@@ -44,7 +44,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         {/* Menu Icon */}
         <button
           className="md:hidden text-gray-600 focus:outline-none menu-icon"
-          onClick={toggleSidebar}
+          onClick={() => setSidebarOpen(false)}
         >
           <FontAwesomeIcon icon={faBars} size="lg" />
         </button>
@@ -104,7 +104,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
       >
         <button
           className="absolute top-4 right-4 md:hidden text-gray-600 focus:outline-none menu-icon"
-          onClick={toggleSidebar}
+          onClick={() => setSidebarOpen(false)}
         >
           <FontAwesomeIcon icon={faBars} size="lg" />
         </button>
