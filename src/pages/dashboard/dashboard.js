@@ -1,13 +1,12 @@
 // src/components/Dashboard.js
 
-import React from 'react';
-import PieChart from './chart'; // Import your pie chart component
-import TicketTable from '../ticket/table';
+import React from "react";
+import PieChart from "./chart"; // Import your pie chart component
+import TicketTable from "../ticket/table";
 
 const Dashboard = () => {
   return (
-    <div>
-    <div className="p-3 pt-6 bg-gray-100 flex-1">
+    <div className="flex flex-col p-3 pt-6 bg-gray-100 flex-1">
       <div className="flex flex-wrap mb-6">
         <div className="w-full sm:w-1/2 lg:w-1/4 p-2">
           <div className="bg-white p-4 rounded-lg shadow-md">
@@ -34,9 +33,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-        <PieChart />   
-    </div>
-      <TicketTable />
+
+      {/* Pie Chart Section */}
+      <div className="w-full p-3">
+        <PieChart />
+      </div>
+
+      {/* Ticket Table Section */}
+      <div className="w-full p-3 overflow-x-auto">
+        <TicketTable />
+      </div>
     </div>
   );
 };
