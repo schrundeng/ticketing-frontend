@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const TicketTable = () => {
   // Sample data
   const [tickets, setTickets] = useState([
-    { id: 1, date: '2024-08-01', user: 'John Doe', issue: 'Login Issue', status: 'Open', solution: 'N/A' },
-    { id: 2, date: '2024-08-02', user: 'Jane Smith', issue: 'Payment Error', status: 'Closed', solution: 'Fixed payment gateway' },
-    { id: 3, date: '2024-08-03', user: 'Alice Johnson', issue: 'Page Not Found', status: 'In Progress', solution: 'Investigating' },
+    {
+      id: 1,
+      date: "2024-08-01",
+      user: "John Doe",
+      issue: "Login Issue",
+      status: "Open",
+      solution: "N/A",
+    },
+    {
+      id: 2,
+      date: "2024-08-02",
+      user: "Jane Smith",
+      issue: "Payment Error",
+      status: "Closed",
+      solution: "Fixed payment gateway",
+    },
+    {
+      id: 3,
+      date: "2024-08-03",
+      user: "Alice Johnson",
+      issue: "Page Not Found",
+      status: "In Progress",
+      solution: "Investigating",
+    },
     // Add more sample data as needed
   ]);
 
@@ -20,19 +41,21 @@ const TicketTable = () => {
   const handleClose = () => setOpen(false);
 
   const handleSaveTicket = () => {
-    setTickets(tickets.map(ticket =>
-      ticket.id === editingTicket.id ? editingTicket : ticket
-    ));
+    setTickets(
+      tickets.map((ticket) =>
+        ticket.id === editingTicket.id ? editingTicket : ticket
+      )
+    );
     handleClose();
   };
 
   return (
-    <div className="p-6 bg-gray-100 flex-1">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Tickets</h2>
+    <div>
+      <div className="w-full bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+        <h2 className="text-2xl font-bold mb-6">Tickets</h2>
 
         {/* Ticket Table */}
-        <table className="w-full table-auto border-collapse">
+        <table className="table-auto min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 border-b">
               <th className="p-3 text-left">ID</th>
@@ -45,12 +68,20 @@ const TicketTable = () => {
             </tr>
           </thead>
           <tbody>
-            {tickets.map(ticket => (
+            {tickets.map((ticket) => (
               <tr key={ticket.id} className="border-b hover:bg-gray-50">
                 <td className="p-3">{ticket.id}</td>
                 <td className="p-3">{ticket.user}</td>
                 <td className="p-3">{ticket.issue}</td>
-                <td className={`p-3 font-medium ${ticket.status === 'Open' ? 'text-red-600' : ticket.status === 'Closed' ? 'text-green-600' : 'text-yellow-600'}`}>
+                <td
+                  className={`p-3 font-medium ${
+                    ticket.status === "Open"
+                      ? "text-red-600"
+                      : ticket.status === "Closed"
+                      ? "text-green-600"
+                      : "text-yellow-600"
+                  }`}
+                >
                   {ticket.status}
                 </td>
                 <td className="p-3">{ticket.date}</td>
@@ -75,21 +106,35 @@ const TicketTable = () => {
               <h3 className="text-lg font-semibold mb-4">Edit Ticket</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
                   <input
                     type="text"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    value={editingTicket?.status || ''}
-                    onChange={(e) => setEditingTicket({ ...editingTicket, status: e.target.value })}
+                    value={editingTicket?.status || ""}
+                    onChange={(e) =>
+                      setEditingTicket({
+                        ...editingTicket,
+                        status: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Solution</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Solution
+                  </label>
                   <input
                     type="text"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    value={editingTicket?.solution || ''}
-                    onChange={(e) => setEditingTicket({ ...editingTicket, solution: e.target.value })}
+                    value={editingTicket?.solution || ""}
+                    onChange={(e) =>
+                      setEditingTicket({
+                        ...editingTicket,
+                        solution: e.target.value,
+                      })
+                    }
                   />
                 </div>
               </div>

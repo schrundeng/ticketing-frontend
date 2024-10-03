@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEnvelope,
@@ -6,23 +6,67 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userData, setUserData] = useState(null); // State to store user data
   const navigate = useNavigate();
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:8000/api/user", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+          },
+        });
+        setUserData(response.data); // Set user data from the response
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        // Handle error or redirect to login if the token is invalid
+        navigate("/");
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    // Remove the token from localStorage
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    // Redirect to the login page
-    navigate("/");
+      // Make the API request to log out the user
+      await axios.post(
+        "http://localhost:8000/api/user/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+          },
+        }
+      );
+
+      // Remove the token from localStorage after successful logout
+      localStorage.removeItem("token");
+
+      // Redirect to the login page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Handle the error, maybe show a message to the user
+    }
   };
 
+  const goToChat = () => {
+    navigate("/chat"); // Navigate to chat page
+  };
   return (
     <div>
       {/* Navbar */}
@@ -31,7 +75,10 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
         <div className="flex items-center space-x-">
-          <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={goToChat} // Call goToChat on click
+          >
             <FontAwesomeIcon icon={faEnvelope} />
           </button>
         </div>
@@ -43,8 +90,13 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">Budi Nakamura</p>
-                <p className="text-sm text-right">Member</p>
+                {/* Display real user data */}
+                <p className="font-semibold">
+                  {userData ? userData.name : "Loading..."} {/* User name */}
+                </p>
+                <p className="text-sm text-right">
+                  {userData ? userData.id_user : ""} {/* User ID */}
+                </p>
               </div>
               <img
                 src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"

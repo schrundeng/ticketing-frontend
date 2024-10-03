@@ -29,11 +29,13 @@ function App() {
                   setSidebarOpen={setSidebarOpen}
                 />
                 <div
-                  className={`flex flex-col flex-1 mt-16 transition-all duration-300 ${
-                    sidebarOpen
-                      ? "ml-72 max-w-[calc(100%-18rem)]"
-                      : "ml-0 max-w-full"
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
                   }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
                 >
                   <Dashboard />
                 </div>
@@ -52,13 +54,17 @@ function App() {
                   setSidebarOpen={setSidebarOpen}
                 />
                 <div
-                  className={`flex flex-col flex-1 mt-16 transition-all duration-300 ${
-                    sidebarOpen
-                      ? "ml-72 max-w-[calc(100%-18rem)]"
-                      : "ml-0 max-w-full"
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
                   }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
                 >
-                  <Pengelola />
+                  <div className="w-full p-3 overflow-x-auto">
+                    <Pengelola />
+                  </div>
                 </div>
               </div>
             </PrivateRoute>
@@ -75,13 +81,17 @@ function App() {
                   setSidebarOpen={setSidebarOpen}
                 />
                 <div
-                  className={`flex flex-col flex-1 mt-16 transition-all duration-300 ${
-                    sidebarOpen
-                      ? "ml-72 max-w-[calc(100%-18rem)]"
-                      : "ml-0 max-w-full"
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
                   }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
                 >
-                  <TicketTable />
+                  <div className="w-full p-3 overflow-x-auto">
+                    <TicketTable />
+                  </div>
                 </div>
               </div>
             </PrivateRoute>
