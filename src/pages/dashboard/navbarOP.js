@@ -44,7 +44,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         {/* Menu Icon */}
         <button
           className="md:hidden text-gray-600 focus:outline-none menu-icon"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setSidebarOpen(true)}
         >
           <FontAwesomeIcon icon={faBars} size="lg" />
         </button>
