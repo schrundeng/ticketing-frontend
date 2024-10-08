@@ -1,35 +1,74 @@
 // src/components/Dashboard.js
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PieChart from "./chart"; // Import your pie chart component
 import TicketTable from "../ticket/table";
 
 const Dashboard = () => {
+  const [ticketOpen, setTicketOpen] = useState(0);
+  const [ticketInProgress, setTicketInProgress] = useState(0);
+  const [ticketClosed, setTicketClosed] = useState(0);
+  const [totalTicketsThisWeek, setTotalTicketsThisWeek] = useState(0);
+
+  const authToken = localStorage.getItem("token"); // Grab the auth token from local storage
+
+  const fetchData = async (url, setter) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      const data = await response.json();
+      setter(data.total_tickets); // Set the total_tickets field to the corresponding state
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(
+      "http://localhost:8000/api/pengelola/operator/getpendingticket",
+      setTicketOpen
+    );
+    fetchData(
+      "http://localhost:8000/api/pengelola/operator/getongoingticket",
+      setTicketInProgress
+    );
+    fetchData(
+      "http://localhost:8000/api/pengelola/operator/getresolvedticket",
+      setTicketClosed
+    );
+    fetchData(
+      "http://localhost:8000/api/pengelola/operator/gettotalticketbyweek",
+      setTotalTicketsThisWeek
+    );
+  }, []);
   return (
     <div className="flex flex-col p-3 pt-6 bg-gray-100 flex-1">
       <div className="flex flex-wrap mb-6">
         <div className="w-full sm:w-1/2 lg:w-1/4 p-2">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div>Ticket Closed</div>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">{ticketClosed}</div>
           </div>
         </div>
         <div className="w-full sm:w-1/2 lg:w-1/4 p-2">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div>Ticket In Progress</div>
-            <div className="text-2xl font-bold">20</div>
+            <div className="text-2xl font-bold">{ticketInProgress}</div>
           </div>
         </div>
         <div className="w-full sm:w-1/2 lg:w-1/4 p-2">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div>Ticket Open</div>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{ticketOpen}</div>
           </div>
         </div>
         <div className="w-full sm:w-1/2 lg:w-1/4 p-2">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <div>Total Ticket This Week</div>
-            <div className="text-2xl font-bold">10</div>
+            <div className="text-2xl font-bold">{totalTicketsThisWeek}</div>
           </div>
         </div>
       </div>
