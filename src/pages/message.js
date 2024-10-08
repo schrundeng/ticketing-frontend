@@ -1,36 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 const Message = () => {
   // Dummy chat data with profile images for users and operator
   const chatData = {
     User1: {
-      profileImg: 'https://i.redd.it/os9z4v7ljol81.jpg',
+      profileImg: "https://i.redd.it/os9z4v7ljol81.jpg",
       messages: [
-        { text: ':3', sender: 'User1' },
-        { text: 'kys', sender: 'Operator' },
+        { text: ":3", sender: "User1" },
+        { text: "kys", sender: "Operator" },
       ],
     },
     User2: {
-      profileImg: 'https://randomuser.me/api/portraits/women/2.jpg',
+      profileImg: "https://randomuser.me/api/portraits/women/2.jpg",
       messages: [
-        { text: 'Can you help me with my account?', sender: 'User2' },
-        { text: 'Sure! What’s the issue?', sender: 'Operator' },
+        { text: "Can you help me with my account?", sender: "User2" },
+        { text: "Sure! What’s the issue?", sender: "Operator" },
       ],
     },
     User3: {
-      profileImg: 'https://randomuser.me/api/portraits/men/3.jpg',
+      profileImg: "https://randomuser.me/api/portraits/men/3.jpg",
       messages: [
-        { text: 'What’s the latest update on my request?', sender: 'User3' },
-        { text: 'We are still working on it. Will update soon!', sender: 'Operator' },
+        { text: "What’s the latest update on my request?", sender: "User3" },
+        {
+          text: "We are still working on it. Will update soon!",
+          sender: "Operator",
+        },
       ],
     },
   };
 
-  const operatorProfileImg = 'https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg'; // Operator's profile image
+  const operatorProfileImg =
+    "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"; // Operator's profile image
 
-  const [selectedUser, setSelectedUser] = useState('User1'); // Default to User1
+  const [selectedUser, setSelectedUser] = useState("User1"); // Default to User1
   const [messages, setMessages] = useState(chatData[selectedUser].messages); // State for chat messages
-  const [newMessage, setNewMessage] = useState(''); // State for new message input
+  const [newMessage, setNewMessage] = useState(""); // State for new message input
   const [loading, setLoading] = useState(false); // State for loading indicator
   const messageEndRef = useRef(null); // Reference to scroll to the bottom
 
@@ -42,7 +46,7 @@ const Message = () => {
   // Scroll to the bottom when a new message is added
   useEffect(() => {
     if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
@@ -51,10 +55,14 @@ const Message = () => {
     e.preventDefault();
     if (newMessage.trim()) {
       setLoading(true); // Set loading state to true
-      setTimeout(() => { // Simulate a network request
-        const updatedMessages = [...messages, { text: newMessage, sender: 'Operator' }];
+      setTimeout(() => {
+        // Simulate a network request
+        const updatedMessages = [
+          ...messages,
+          { text: newMessage, sender: "Operator" },
+        ];
         setMessages(updatedMessages);
-        setNewMessage(''); // Clear input field
+        setNewMessage(""); // Clear input field
         chatData[selectedUser].messages = updatedMessages; // Update the dummy data for current user
         setLoading(false); // Reset loading state
       }, 1000);
@@ -62,7 +70,7 @@ const Message = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-200">
+    <div className="flex h-[calc(100vh-6rem)] pt-3">
       {/* Sidebar */}
       <div className="w-64 bg-gray-800 text-white flex-shrink-0 p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6">Chats</h2>
@@ -71,7 +79,11 @@ const Message = () => {
             <li
               key={user}
               onClick={() => setSelectedUser(user)}
-              className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors duration-300 ${selectedUser === user ? 'bg-gray-700' : 'bg-gray-900 hover:bg-gray-700'}`}
+              className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors duration-300 ${
+                selectedUser === user
+                  ? "bg-gray-700"
+                  : "bg-gray-900 hover:bg-gray-700"
+              }`}
             >
               {user}
             </li>
@@ -99,9 +111,13 @@ const Message = () => {
             messages.map((message, index) => (
               <div
                 key={index}
-                className={`mb-4 flex items-center ${message.sender === 'Operator' ? 'justify-end' : 'justify-start'}`}
+                className={`mb-4 flex items-center ${
+                  message.sender === "Operator"
+                    ? "justify-end"
+                    : "justify-start"
+                }`}
               >
-                {message.sender === 'Operator' ? (
+                {message.sender === "Operator" ? (
                   <>
                     <div className="inline-block max-w-xs px-4 py-2 rounded-xl shadow bg-blue-500 text-white">
                       <strong>{message.sender}:</strong> {message.text}
@@ -127,12 +143,17 @@ const Message = () => {
               </div>
             ))
           )}
-          {loading && <div className="text-gray-500 text-center">Sending message...</div>}
+          {loading && (
+            <div className="text-gray-500 text-center">Sending message...</div>
+          )}
           <div ref={messageEndRef} />
         </div>
 
         {/* Message Input */}
-        <form onSubmit={sendMessage} className="flex mt-4 bg-white rounded-lg shadow-md">
+        <form
+          onSubmit={sendMessage}
+          className="flex mt-4 bg-white rounded-lg shadow-md"
+        >
           <input
             type="text"
             value={newMessage}
