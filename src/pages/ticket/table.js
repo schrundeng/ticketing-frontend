@@ -43,6 +43,63 @@ const TicketTable = () => {
       status: "Closed",
       solution: "Server restarted",
     },
+    // Additional dummy data
+    {
+      id: 6,
+      date: "2024-08-06",
+      user: "David White",
+      issue: "Error 404",
+      status: "Open",
+      solution: "N/A",
+    },
+    {
+      id: 7,
+      date: "2024-08-07",
+      user: "Emma Brown",
+      issue: "Slow Website",
+      status: "In Progress",
+      solution: "Optimizing",
+    },
+    {
+      id: 8,
+      date: "2024-08-08",
+      user: "Frank Black",
+      issue: "Database Error",
+      status: "Closed",
+      solution: "Database Reset",
+    },
+    {
+      id: 9,
+      date: "2024-08-09",
+      user: "Grace Red",
+      issue: "Email Issue",
+      status: "Open",
+      solution: "N/A",
+    },
+    {
+      id: 10,
+      date: "2024-08-10",
+      user: "Hank Blue",
+      issue: "SSL Error",
+      status: "Closed",
+      solution: "SSL Renewed",
+    },
+    {
+      id: 11,
+      date: "2024-08-11",
+      user: "Ivy Orange",
+      issue: "Mobile Layout Issue",
+      status: "Open",
+      solution: "N/A",
+    },
+    {
+      id: 12,
+      date: "2024-08-12",
+      user: "Jake Yellow",
+      issue: "Server Overload",
+      status: "In Progress",
+      solution: "Scaling Servers",
+    },
   ]);
 
   const [open, setOpen] = useState(false);
@@ -54,6 +111,7 @@ const TicketTable = () => {
   const [sortOrder, setSortOrder] = useState("desc"); // Default sort state
   const [sortColumn, setSortColumn] = useState("date"); // State to keep track of the column to sort
   const [maxRows, setMaxRows] = useState(5); // State for maximum rows displayed
+  const [currentPage, setCurrentPage] = useState(1); // Current page
 
   const handleOpen = (ticket) => {
     setEditingTicket(ticket);
@@ -128,37 +186,44 @@ const TicketTable = () => {
     setMaxRows(Number(e.target.value));
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   // Filter and search logic
   const filteredTickets = tickets
-    .filter((ticket) => {
-      const matchesStatus = filter === "All" || ticket.status === filter;
-      const matchesSearch =
-        ticket.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.issue.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDateRange = isDateInRange(ticket.date, startDate, endDate);
+  .filter((ticket) => {
+    const matchesStatus = filter === "All" || ticket.status === filter;
+    const matchesSearch =
+      ticket.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ticket.issue.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDateRange = isDateInRange(ticket.date, startDate, endDate);
 
-      return matchesStatus && matchesSearch && matchesDateRange;
-    })
-    .sort((a, b) => {
-      const getValue = (ticket, column) => {
-        if (column === "date") return new Date(ticket.date);
-        if (column === "user" || column === "issue" || column === "solution")
-          return ticket[column].toLowerCase();
-        return ticket[column];
-      };
+    return matchesStatus && matchesSearch && matchesDateRange;
+  })
+  .sort((a, b) => {
+    const getValue = (ticket, column) => {
+      if (column === "date") return new Date(ticket.date);
+      if (column === "user" || column === "issue" || column === "solution")
+        return ticket[column].toLowerCase();
+      return ticket[column];
+    };
 
-      const valueA = getValue(a, sortColumn);
-      const valueB = getValue(b, sortColumn);
+    const valueA = getValue(a, sortColumn);
+    const valueB = getValue(b, sortColumn);
 
-      return sortOrder === "asc"
-        ? valueA > valueB
-          ? 1
-          : -1
-        : valueA < valueB
+    return sortOrder === "asc"
+      ? valueA > valueB
         ? 1
-        : -1;
-    })
-    .slice(0, maxRows); // Limit the number of displayed rows
+        : -1
+      : valueA < valueB
+      ? 1
+      : -1;
+  });
+
+  const totalPages = Math.ceil(filteredTickets.length / maxRows);
+  const startIdx = (currentPage - 1) * maxRows;
+  const paginatedTickets = filteredTickets.slice(startIdx, startIdx + maxRows);
 
   return (
     <div>
@@ -309,7 +374,7 @@ const TicketTable = () => {
           </thead>
 
           <tbody>
-            {filteredTickets.map((ticket) => (
+            {paginatedTickets.map((ticket) => (
               <tr key={ticket.id} className="border-b hover:bg-gray-50">
                 <td className="p-3">{ticket.id}</td>
                 <td className="p-3">{ticket.user}</td>
@@ -343,6 +408,26 @@ const TicketTable = () => {
             ))}
           </tbody>
         </table>
+
+        <div className="mt-4 flex justify-center items-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="bg-gray-300 px-4 py-2 rounded-lg"
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="bg-gray-300 px-4 py-2 rounded-lg"
+          >
+            Next
+          </button>
+        </div>
 
         <div className="mt-4 flex justify-center">
           <label
