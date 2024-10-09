@@ -1,50 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const TicketTable = () => {
-  // Sample data
-  const [tickets, setTickets] = useState([
-    {
-      id: 1,
-      date: "2024-08-01",
-      user: "John Doe",
-      issue: "Login Issue",
-      status: "Open",
-      solution: "N/A",
-    },
-    {
-      id: 2,
-      date: "2024-08-02",
-      user: "Jane Smith",
-      issue: "Payment Error",
-      status: "Closed",
-      solution: "Fixed payment gateway",
-    },
-    {
-      id: 3,
-      date: "2024-08-03",
-      user: "Alice Johnson",
-      issue: "Page Not Found",
-      status: "In Progress",
-      solution: "Investigating",
-    },
-    {
-      id: 4,
-      date: "2024-08-04",
-      user: "Bob Brown",
-      issue: "Data Sync Issue",
-      status: "Open",
-      solution: "N/A",
-    },
-    {
-      id: 5,
-      date: "2024-08-05",
-      user: "Charlie Green",
-      issue: "Server Downtime",
-      status: "Closed",
-      solution: "Server restarted",
-    },
-  ]);
-
+  const [tickets, setTickets] = useState([]); // Initialize with an empty array
   const [open, setOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState(null);
   const [filter, setFilter] = useState("All"); // Filter state
@@ -54,6 +11,46 @@ const TicketTable = () => {
   const [sortOrder, setSortOrder] = useState("desc"); // Default sort state
   const [sortColumn, setSortColumn] = useState("date"); // State to keep track of the column to sort
   const [maxRows, setMaxRows] = useState(5); // State for maximum rows displayed
+  const [currentPage, setCurrentPage] = useState(1); // Current page
+
+  // Fetch ticket data from the API
+  useEffect(() => {
+    const fetchTickets = async () => {
+      const token = localStorage.getItem("token"); // Get token from local storage
+
+      try {
+        const response = await fetch(
+          "http://localhost:8000/api/pengelola/ticket/getTicket",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (data.status === "success") {
+          // Map API data to the ticket structure you need
+          const fetchedTickets = data.ticket.map((ticket) => ({
+            id: ticket.id_ticket,
+            date: ticket.date_created.split(" ")[0], // Extract date part
+            user: ticket.id_user, // Assuming this is the user name, adjust if needed
+            issue: ticket.description,
+            status: ticket.status_note,
+            solution: "N/A", // Set a default for solution, can be updated later
+          }));
+          setTickets(fetchedTickets);
+        } else {
+          console.error("Failed to fetch tickets:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      }
+    };
+
+    fetchTickets();
+  }, []); // Empty dependency array to run once on mount
 
   const handleOpen = (ticket) => {
     setEditingTicket(ticket);
@@ -62,13 +59,50 @@ const TicketTable = () => {
 
   const handleClose = () => setOpen(false);
 
-  const handleSaveTicket = () => {
-    setTickets(
-      tickets.map((ticket) =>
-        ticket.id === editingTicket.id ? editingTicket : ticket
-      )
-    );
-    handleClose();
+  const handleSaveTicket = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    const token = localStorage.getItem("token"); // Get token from local storage
+    const ticketId = editingTicket.id; // Get the ticket ID
+    const statusUrlMap = {
+      Pending: `http://localhost:8000/api/pengelola/operator/ticket/assignTicket/${ticketId}`,
+      "In Progress": `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`,
+      Resolved: `http://localhost:8000/api/pengelola/operator/ticket/completeTicket/${ticketId}`,
+    };
+
+    const apiUrl = statusUrlMap[editingTicket.status]; // Get the correct URL based on status
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ solution: editingTicket.solution }), // Send updated solution
+      });
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setTickets(
+          tickets.map((ticket) =>
+            ticket.id === editingTicket.id
+              ? {
+                  ...ticket,
+                  status: editingTicket.status,
+                  solution: editingTicket.solution,
+                }
+              : ticket
+          )
+        );
+        handleClose(); // Close the modal after saving
+      } else {
+        console.error("Failed to update ticket:", data.message);
+      }
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+    }
   };
 
   const handleFilterChange = (e) => {
@@ -113,12 +147,9 @@ const TicketTable = () => {
 
   // Toggle sort order
   const toggleSortOrder = (column) => {
-    // Check if the column being clicked is already the sorted column
     if (sortColumn === column) {
-      // If it's the same column, just toggle the order
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      // If it's a new column, set it to ascending by default
       setSortColumn(column);
       setSortOrder("asc");
     }
@@ -126,6 +157,10 @@ const TicketTable = () => {
 
   const handleMaxRowsChange = (e) => {
     setMaxRows(Number(e.target.value));
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   // Filter and search logic
@@ -157,8 +192,11 @@ const TicketTable = () => {
         : valueA < valueB
         ? 1
         : -1;
-    })
-    .slice(0, maxRows); // Limit the number of displayed rows
+    });
+
+  const totalPages = Math.ceil(filteredTickets.length / maxRows);
+  const startIdx = (currentPage - 1) * maxRows;
+  const paginatedTickets = filteredTickets.slice(startIdx, startIdx + maxRows);
 
   return (
     <div>
@@ -188,9 +226,9 @@ const TicketTable = () => {
               className="border rounded-md p-2"
             >
               <option value="All">All</option>
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-              <option value="In Progress">In Progress</option>
+              <option value="Pending">Pending</option>
+              <option value="Resolved">Resolved</option>
+              <option value="On Going">On Going</option>
             </select>
           </div>
 
@@ -267,11 +305,11 @@ const TicketTable = () => {
               </th>
               <th
                 className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("status")}
+                onClick={() => toggleSortOrder("date")}
               >
-                Status{" "}
+                Date{" "}
                 <span>
-                  {sortColumn === "status"
+                  {sortColumn === "date"
                     ? sortOrder === "asc"
                       ? "▲"
                       : "▼"
@@ -280,11 +318,11 @@ const TicketTable = () => {
               </th>
               <th
                 className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("date")}
+                onClick={() => toggleSortOrder("status")}
               >
-                Date{" "}
+                Status{" "}
                 <span>
-                  {sortColumn === "date"
+                  {sortColumn === "status"
                     ? sortOrder === "asc"
                       ? "▲"
                       : "▼"
@@ -307,67 +345,93 @@ const TicketTable = () => {
               <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
-
           <tbody>
-            {filteredTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-gray-50">
-                <td className="p-3">{ticket.id}</td>
-                <td className="p-3">{ticket.user}</td>
-                <td className="p-3">{ticket.issue}</td>
-                <td className="p-3">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full font-bold ${
-                      ticket.status === "Open"
-                        ? "bg-green-600 text-white"
-                        : ticket.status === "Closed"
-                        ? "bg-red-600 text-white"
-                        : ticket.status === "In Progress"
-                        ? "bg-yellow-500 text-white"
-                        : "bg-gray-500 text-white"
-                    }`}
-                  >
-                    {ticket.status}
-                  </span>
-                </td>
-                <td className="p-3">{ticket.date}</td>
-                <td className="p-3">{ticket.solution}</td>
-                <td className="p-3">
-                  <button
-                    onClick={() => handleOpen(ticket)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                  >
-                    Edit
-                  </button>
+            {paginatedTickets.length > 0 ? (
+              paginatedTickets.map((ticket) => (
+                <tr key={ticket.id} className="border-b hover:bg-gray-100">
+                  <td className="p-3">{ticket.id}</td>
+                  <td className="p-3">{ticket.user}</td>
+                  <td className="p-3">{ticket.issue}</td>
+                  <td className="p-3">{ticket.date}</td>
+                  <td className="p-3">
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full font-bold ${
+                        ticket.status === "Pending"
+                          ? "bg-red-600 text-white"
+                          : ticket.status === "Resolved"
+                          ? "bg-green-600 text-white"
+                          : ticket.status === "On Going"
+                          ? "bg-yellow-500 text-white"
+                          : "bg-gray-500 text-white"
+                      }`}
+                    >
+                      {ticket.status}
+                    </span>
+                  </td>
+                  <td className="p-3">{ticket.solution}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => handleOpen(ticket)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center p-3">
+                  No tickets found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
 
-        <div className="mt-4 flex justify-center">
-          <label
-            htmlFor="maxRows"
-            className="mt-2 mr-2 font-medium text-gray-700"
-          >
-            Max Rows:
-          </label>
-          <select
-            id="maxRows"
-            value={maxRows}
-            onChange={handleMaxRowsChange}
-            className="border rounded-md p-2"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-          </select>
+        {/* Pagination Controls */}
+        <div className="flex justify-between items-center mt-4">
+          <div>
+            <label htmlFor="maxRows" className="mr-2">
+              Rows per page:
+            </label>
+            <select
+              id="maxRows"
+              value={maxRows}
+              onChange={handleMaxRowsChange}
+              className="border rounded-md p-2"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+            </select>
+          </div>
+
+          <div>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="mx-2">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
 
-        {/* Edit Modal */}
+        {/* Modal for Editing Ticket */}
         {open && (
           <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="modal-content bg-white p-6 rounded-lg shadow-lg">
+            <div className="modal-content bg-white p-6 rounded-lg shadow-lg w-1/4">
               <h2 className="text-xl font-bold mb-4">Edit Ticket</h2>
               <form onSubmit={handleSaveTicket}>
                 <div className="mb-4">
@@ -377,12 +441,17 @@ const TicketTable = () => {
                   <select
                     name="status"
                     value={editingTicket.status}
-                    onChange={handleSaveTicket}
+                    onChange={(e) =>
+                      setEditingTicket({
+                        ...editingTicket,
+                        status: e.target.value,
+                      })
+                    }
                     className="border rounded-md p-2 w-full"
                   >
-                    <option value="Open">Open</option>
-                    <option value="Closed">Closed</option>
+                    <option value="Pending">Pending</option>
                     <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
                   </select>
                 </div>
                 <div className="mb-4">
@@ -393,23 +462,30 @@ const TicketTable = () => {
                     type="text"
                     name="solution"
                     value={editingTicket.solution}
-                    onChange={handleSaveTicket}
+                    onChange={(e) =>
+                      setEditingTicket({
+                        ...editingTicket,
+                        solution: e.target.value,
+                      })
+                    }
                     className="border rounded-md p-2 w-full"
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="bg-gray-300 px-4 py-2 rounded-md"
-                >
-                  Cancel
-                </button>
+                <div className="flex justify-between mt-4">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="bg-gray-300 px-4 py-2 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  >
+                    Save
+                  </button>
+                </div>
               </form>
             </div>
           </div>

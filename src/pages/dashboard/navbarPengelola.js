@@ -118,11 +118,11 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="ml-4 text-2xl font-bold">Lapor-UM</div>
         </div>
         <ul className="text-gray-300">
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/ticketop' ? 'bg-[#213751]  text-white rounded-lg' : ''}`}>
+          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/dashboardpengelola' ? 'bg-[#213751]  text-white rounded-lg' : ''}`}>
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
               <FontAwesomeIcon icon={faTicketAlt} size="lg" />
             </button>
-            <Link to="/ticketop" className={`ml-3 ${location.pathname === '/ticketop' ? 'font-semibold' : ''}`}>Ticket</Link>
+            <Link to="/dashboardpengelola" className={`ml-3 ${location.pathname === '/dashboardpengelola' ? 'font-semibold' : ''}`}>Ticket</Link>
           </li>
           <li className={`mb-4 p-1 flex items-center ${location.pathname === '/message' ? 'bg-[#213751] text-white rounded-lg' : ''}`}>
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
