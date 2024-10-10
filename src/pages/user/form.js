@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import NavbarUser from "./userNavbar.js";
+import NavbarUser from "./navbarUser.js";
 import axios from "axios"; // Import axios
 
 const Form = () => {
   const [deskripsi, setDeskripsi] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(""); // This will store the selected 'id_category'
   const [categories, setCategories] = useState([]); // Store fetched categories
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // State for success notification
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -49,32 +50,43 @@ const Form = () => {
       return;
     }
 
-    const data = {
-      deskripsi,
-      category,
-    };
+    const data = new FormData(); // Using FormData for form submissions
+    data.append("id_category", category); // Use the selected 'id_category'
+    data.append("description", deskripsi); // 'deskripsi' is the form's description
 
     try {
       const token = localStorage.getItem("token"); // Get token from localStorage
       const response = await axios.post(
-        "http://localhost:8000/api/reportIssue",
+        "http://localhost:8000/api/user/ticket/create",
         data,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            "Content-Type": "multipart/form-data", // Important for file and form uploads
           },
         }
       );
 
       if (response.status === 200) {
-        // Handle success (e.g., show a success message or redirect)
-        alert("Issue reported successfully!");
+        const ticketId = response.data.ticket.id_ticket; // Get the ticket_id from the response
+
+        // Store ticket_id in localStorage for later use
+        localStorage.setItem("ticket_id", ticketId);
+
+        // Notify the user of successful submission
+        setSuccessMessage(
+          `Ticket created successfully! Your Ticket ID is: ${ticketId}`
+        );
+
+        // Clear form fields
         setDeskripsi("");
         setCategory("");
+        setError(""); // Clear any previous errors
       }
     } catch (error) {
       console.error("Error reporting issue:", error);
       setError("Failed to report the issue. Please try again.");
+      setSuccessMessage(""); // Clear success message on error
     }
   };
 
@@ -98,9 +110,11 @@ const Form = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
           Laporkan Masalah Anda
         </h2>
-
         {error && <div className="text-red-500 mb-4">{error}</div>}
-
+        {successMessage && (
+          <div className="text-green-500 mb-4">{successMessage}</div>
+        )}{" "}
+        {/* Success message */}
         <form onSubmit={handleSubmit}>
           {/* Deskripsi Masalah Input */}
           <div className="mb-4">
@@ -132,11 +146,11 @@ const Form = () => {
               id="category"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => setCategory(e.target.value)} // This sets the id_category in state
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <option key={cat.id_category} value={cat.id_category}>
                   {cat.name}
                 </option>
               ))}
