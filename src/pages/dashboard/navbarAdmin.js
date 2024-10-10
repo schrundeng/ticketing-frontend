@@ -8,19 +8,42 @@ import {
   faBars,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect} from "react";
+import axios from "axios";
 
 const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
-
+  const navigate = useNavigate();
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    // Handle logout logic here
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Make the API request to log out the admin
+      await axios.patch(
+        "http://localhost:8000/api/pengelola/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+          },
+        }
+      );
+
+      // Remove the token from localStorage after successful logout
+      localStorage.removeItem("token");
+
+      // Redirect to the login page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Handle the error, maybe show a message to the user
+    }
   };
 
   // Check window width to set default sidebar state

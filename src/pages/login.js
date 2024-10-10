@@ -76,7 +76,7 @@ export default function SignInSide() {
           if (id.length === 12) {
             navigate("/form");
           } else if (id.length === 18) {
-            navigate("/dashboard");
+            navigate("/dashboardpengelola");
           }
         } else {
           setError("Login failed. Please check your credentials.");

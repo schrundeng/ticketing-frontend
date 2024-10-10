@@ -1,8 +1,17 @@
 // src/components/CombinedNavbarSidebarOperator.js
-import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faSignOutAlt, faChevronDown, faTicketAlt, faBars, faCommentDots } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faSignOutAlt,
+  faChevronDown,
+  faTicketAlt,
+  faBars,
+  faCommentDots,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -11,6 +20,33 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
+  };
+
+  // Logout handling with API
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      // Make the API request to log out the operator
+      await axios.patch(
+        "http://localhost:8000/api/pengelola/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+          },
+        }
+      );
+
+      // Remove the token from localStorage after successful logout
+      localStorage.removeItem("token");
+
+      // Redirect to the login page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Handle the error, maybe show a message to the user
+    }
   };
 
   // Check window width to set default sidebar state
@@ -33,20 +69,19 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
     };
   }, [setSidebarOpen]);
 
-  const handleLogout = () => {
-    navigate('/'); // Redirect to the login page
-  };
-
   return (
     <div>
       {/* Navbar */}
-      <div style={{ backgroundColor: '#FFA300', zIndex: 40 }} className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md">
-        {/* Menu Icon */}
+      <div
+        style={{ backgroundColor: "#FFA300", zIndex: 40 }}
+        className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
+      >
+        {/* Toggle Button for Sidebar */}
         <button
-          className="md:hidden text-gray-600 focus:outline-none menu-icon"
-          onClick={() => setSidebarOpen(true)}
+          className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded" // Neater styling
+          onClick={() => setSidebarOpen((prev) => !prev)}
         >
-          <FontAwesomeIcon icon={faBars} size="lg" />
+          <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
         </button>
 
         {/* Right Side: User Info and Icons */}
@@ -65,13 +100,13 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
                 <p className="font-semibold">Makoto Alghifari</p>
                 <p className="text-sm text-right">Operator</p>
               </div>
-              <img 
-                src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg" 
-                alt="User" 
+              <img
+                src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"
+                alt="User"
                 className="w-10 h-10 rounded-full object-cover"
               />
-              <button 
-                className="ml-2 text-gray-600 focus:outline-none" 
+              <button
+                className="ml-2 text-gray-600 focus:outline-none"
                 onClick={toggleDropdown}
               >
                 <FontAwesomeIcon icon={faChevronDown} />
@@ -83,11 +118,14 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
                 aria-hidden={!dropdownOpen}
               >
                 <ul className="py-2">
-                  <li 
+                  <li
                     className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     onClick={handleLogout}
                   >
-                    <FontAwesomeIcon icon={faSignOutAlt} className="mr-2 text-gray-600" />
+                    <FontAwesomeIcon
+                      icon={faSignOutAlt}
+                      className="mr-2 text-gray-600"
+                    />
                     Log Out
                   </li>
                 </ul>
@@ -98,10 +136,13 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
       </div>
 
       {/* Sidebar */}
-      <div 
-        style={{ backgroundColor: '#264262', zIndex: 40 }} 
-        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 sidebar ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:block md:w-72`}
+      <div
+        style={{ backgroundColor: "#264262", zIndex: 40 }}
+        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 sidebar ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:block md:w-72`}
       >
+        {/* Close Button */}
         <button
           className="absolute top-4 right-4 md:hidden text-gray-600 focus:outline-none menu-icon"
           onClick={() => setSidebarOpen(false)}
@@ -110,25 +151,53 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         </button>
 
         <div className="flex items-center text-white mb-10">
-          <img 
-            src='https://um.ac.id/wp-content/uploads/2020/08/cropped-Lambang-UM-300x300.png' 
-            alt="Logo" 
+          <img
+            src="https://um.ac.id/wp-content/uploads/2020/08/cropped-Lambang-UM-300x300.png"
+            alt="Logo"
             className="w-24 h-24"
           />
           <div className="ml-4 text-2xl font-bold">Lapor-UM</div>
         </div>
         <ul className="text-gray-300">
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/dashboardpengelola' ? 'bg-[#213751]  text-white rounded-lg' : ''}`}>
+          <li
+            className={`mb-4 p-1 flex items-center ${
+              location.pathname === "/dashboardpengelola"
+                ? "bg-[#213751]  text-white rounded-lg"
+                : ""
+            }`}
+          >
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
               <FontAwesomeIcon icon={faTicketAlt} size="lg" />
             </button>
-            <Link to="/dashboardpengelola" className={`ml-3 ${location.pathname === '/dashboardpengelola' ? 'font-semibold' : ''}`}>Ticket</Link>
+            <Link
+              to="/dashboardpengelola"
+              className={`ml-3 ${
+                location.pathname === "/dashboardpengelola"
+                  ? "font-semibold"
+                  : ""
+              }`}
+            >
+              Ticket
+            </Link>
           </li>
-          <li className={`mb-4 p-1 flex items-center ${location.pathname === '/message' ? 'bg-[#213751] text-white rounded-lg' : ''}`}>
+          <li
+            className={`mb-4 p-1 flex items-center ${
+              location.pathname === "/message"
+                ? "bg-[#213751] text-white rounded-lg"
+                : ""
+            }`}
+          >
             <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
               <FontAwesomeIcon icon={faCommentDots} size="lg" />
             </button>
-            <Link to="/message" className={`ml-3 ${location.pathname === '/message' ? 'font-semibold' : ''}`}>Message</Link>
+            <Link
+              to="/message"
+              className={`ml-3 ${
+                location.pathname === "/message" ? "font-semibold" : ""
+              }`}
+            >
+              Message
+            </Link>
           </li>
         </ul>
       </div>
