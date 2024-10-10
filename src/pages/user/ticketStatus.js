@@ -11,16 +11,17 @@ const TicketStatus = () => {
   useEffect(() => {
     const fetchTicket = async () => {
       const token = localStorage.getItem("token");
-      const ticketId = "123"; // Replace with dynamic ticket ID logic
+      const ticketId = "f33e9a1d-08a4-4705-bc56-bd84e2b4a207"; // Replace with dynamic ticket ID logic
 
       if (!token) {
         setError("No token found. Please log in.");
+        setLoading(false);
         return;
       }
 
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/user/ticket/${ticketId}`,
+          `http://localhost:8000/api/user/ticket/getTicketId/${ticketId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -29,14 +30,17 @@ const TicketStatus = () => {
         );
 
         if (response.status === 200) {
-          setTicket(response.data);
+          // Accessing the ticket data from the response
+          setTicket(response.data.ticket); // Update this line
           setLoading(false);
         } else {
           setError("Failed to fetch ticket.");
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching ticket:", error);
         setError("An error occurred while fetching the ticket.");
+        setLoading(false);
       }
     };
 
@@ -45,22 +49,22 @@ const TicketStatus = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "not yet handled":
+      case 0: // Assuming 0 means "not yet handled"
         return (
           <span className="text-gray-500">
             <i className="fas fa-hourglass-start"></i> Not Yet Handled
           </span>
         );
-      case "pending":
-        return (
-          <span className="text-yellow-500">
-            <i className="fas fa-spinner"></i> Pending
-          </span>
-        );
-      case "finished":
+      case 1: // Assuming 1 means "pending"
         return (
           <span className="text-green-500">
-            <i className="fas fa-check-circle"></i> Finished
+            <i className="fas fa-spinner"></i> Finished
+          </span>
+        );
+      case 2: // Assuming 2 means "finished"
+        return (
+          <span className="text-yellow-500">
+            <i className="fas fa-check-circle"></i> Pending
           </span>
         );
       default:
@@ -100,7 +104,7 @@ const TicketStatus = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Ticket ID:
                 </label>
-                <p className="text-gray-800">{ticket.id}</p>
+                <p className="text-gray-800">{ticket.id_ticket}</p>
               </div>
 
               <div className="mb-4">
@@ -114,7 +118,7 @@ const TicketStatus = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Category:
                 </label>
-                <p className="text-gray-800">{ticket.category}</p>
+                <p className="text-gray-800">{ticket.id_category}</p>
               </div>
 
               <div className="mb-4">
@@ -123,6 +127,25 @@ const TicketStatus = () => {
                 </label>
                 <p>{getStatusIcon(ticket.status)}</p>
               </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Status Note:
+                </label>
+                <p className="text-gray-800">{ticket.status_note}</p>
+              </div>
+
+              {/* Optionally display ticket details if needed */}
+              {ticket.detail && ticket.detail.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold">Ticket Details:</h3>
+                  {ticket.detail.map((item) => (
+                    <div key={item.id_detail_ticket} className="mb-2">
+                      <p className="text-gray-800">{item.ticket_note}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )
         )}

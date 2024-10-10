@@ -135,7 +135,7 @@ const ChatPage = () => {
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        <div className="max-h-60 overflow-y-auto mb-4" onScroll={handleScroll}>
+        <div className="h-80 overflow-y-auto mb-4" onScroll={handleScroll}>
           {Array.isArray(messages) && messages.length > 0 ? (
             messages.map((msg, index) => {
               const senderType = determineSender(msg.from_id_user);

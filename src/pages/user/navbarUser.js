@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEnvelope,
   faSignOutAlt,
   faChevronDown,
+  faComment,
+  faTicket,
+  faPenToSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -67,6 +69,12 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
   const goToChat = () => {
     navigate("/chat"); // Navigate to chat page
   };
+  const goToStatus = () => {
+    navigate("/ticketstatus"); // Navigate to chat page
+  };
+  const goToForm = () => {
+    navigate("/form"); // Navigate to chat page
+  };
   return (
     <div>
       {/* Navbar */}
@@ -74,12 +82,28 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#FFA300", zIndex: 40 }}
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
-        <div className="flex items-center space-x-">
+        <div className="flex items-center space-x- px-2">
           <button
             className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onClick={goToChat} // Call goToChat on click
           >
-            <FontAwesomeIcon icon={faEnvelope} />
+            <FontAwesomeIcon icon={faComment} />
+          </button>
+        </div>
+        <div className="flex items-center space-x- px-2">
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={goToStatus} // Call goToChat on click
+          >
+            <FontAwesomeIcon icon={faTicket} />
+          </button>
+        </div>
+        <div className="flex items-center space-x- px-2">
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={goToForm} // Call goToChat on click
+          >
+            <FontAwesomeIcon icon={faPenToSquare} />
           </button>
         </div>
         {/* Right Side: User Info and Icons */}
