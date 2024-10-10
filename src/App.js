@@ -50,7 +50,6 @@ function App() {
         <Route
           path="/pengelola"
           element={
-            <PrivateRoute>
               <div className="flex h-screen">
                 <CombinedNavbarSidebar
                   sidebarOpen={sidebarOpen}
@@ -70,7 +69,6 @@ function App() {
                   </div>
                 </div>
               </div>
-            </PrivateRoute>
           }
         />
 
