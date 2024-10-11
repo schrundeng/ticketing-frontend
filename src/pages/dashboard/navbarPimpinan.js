@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEnvelope,
   faSignOutAlt,
   faChevronDown,
   faTicketAlt,
   faBars,
-  faCommentDots,
+  faTachometerAlt,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 
-const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
+const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const userProfile = {
-    name: "Vita",
-    role: "Operator",
-    image: "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj", // Replace with actual user data
+    name: "Dr. Tirta",
+    role: "Pimpinan",
+    image: "https://preview.redd.it/r21hij26xbic1.png?width=421&format=png&auto=webp&s=76f3b4801830c419cd3427f47e2d9a57c74461be",
   };
 
   const toggleDropdown = () => {
@@ -33,17 +32,15 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-
       await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
       localStorage.removeItem("token");
       navigate("/");
     } catch (error) {
@@ -51,6 +48,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
     }
   };
 
+  // Check window width to set default sidebar state
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 728) {
@@ -61,6 +59,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
     };
 
     handleResize();
+
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -82,6 +81,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#FFA300", zIndex: 40 }}
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
+        {/* Toggle Button for Sidebar */}
         <button
           className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded"
           onClick={() => setSidebarOpen((prev) => !prev)}
@@ -91,13 +91,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Envelope Icon - Redirect to Message Page */}
-          <button
-            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={() => navigate("/message")} // Updated to navigate to the message page
-          >
-            <FontAwesomeIcon icon={faEnvelope} />
-          </button>
+          {/* Icons */}
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
@@ -149,9 +143,10 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-white"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setSidebarOpen(false)} // Close the sidebar
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
@@ -167,40 +162,36 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         <ul className="text-gray-300">
           <li
             className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/dashboardpengelola"
-                ? "bg-[#213751]  text-white rounded-lg"
-                : ""
-            }`}
-          >
-            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
-              <FontAwesomeIcon icon={faTicketAlt} size="lg" />
-            </button>
-            <Link
-              to="/dashboardpengelola"
-              className={`ml-3 ${
-                location.pathname === "/dashboardpengelola"
-                  ? "font-semibold"
-                  : ""
-              }`}
-            >
-              Ticket
-            </Link>
-          </li>
-          <li
-            className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/message"
+              location.pathname === "/dashboardpimpinan"
                 ? "bg-[#213751] text-white rounded-lg"
                 : ""
             }`}
           >
-            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
-              <FontAwesomeIcon icon={faCommentDots} size="lg" />
-            </button>
+            <FontAwesomeIcon icon={faTachometerAlt} size="lg" />
             <Link
-              to="/message"
-              className={`ml-3 ${location.pathname === "/message" ? "font-semibold" : ""}`}
+              to="/dashboardpimpinan"
+              className={`ml-3 ${
+                location.pathname === "/dashboardpimpinan" ? "font-semibold" : ""
+              }`}
             >
-              Message
+              Dashboard
+            </Link>
+          </li>
+          <li
+            className={`mb-4 p-1 flex items-center ${
+              location.pathname === "/ticketpimpinan"
+                ? "bg-[#213751] text-white rounded-lg"
+                : ""
+            }`}
+          >
+            <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+            <Link
+              to="/ticketpimpinan"
+              className={`ml-3 ${
+                location.pathname === "/ticketpimpinan" ? "font-semibold" : ""
+              }`}
+            >
+              Ticket
             </Link>
           </li>
         </ul>
@@ -230,4 +221,4 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-export default CombinedNavbarSidebarOperator;
+export default CombinedNavbarSidebarPimpinan;

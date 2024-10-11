@@ -9,13 +9,27 @@ import {
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: "Makoto Alghifari",
+    role: "Admin datang",
+    image: "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
+  });
   const location = useLocation();
   const navigate = useNavigate();
+
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
@@ -66,6 +80,14 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
     };
   }, [setSidebarOpen]);
 
+  const openProfileModal = () => {
+    setProfileModalOpen(true);
+  };
+
+  const closeProfileModal = () => {
+    setProfileModalOpen(false);
+  };
+
   return (
     <div>
       {/* Navbar */}
@@ -75,7 +97,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         {/* Toggle Button for Sidebar */}
         <button
-          className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded" // Neater styling
+          className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded"
           onClick={() => setSidebarOpen((prev) => !prev)}
         >
           <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
@@ -86,13 +108,14 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">Makoto Alghifari</p>
-                <p className="text-sm text-right">Admin datang</p>
+                <p className="font-semibold">{userProfile.name}</p>
+                <p className="text-sm text-right">{userProfile.role}</p>
               </div>
               <img
-                src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"
+                src={userProfile.image}
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover"
+                onClick={openProfileModal} // Open modal on click
               />
               <button
                 className="ml-2 text-gray-600 focus:outline-none"
@@ -126,7 +149,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       {/* Sidebar */}
       <div
-        style={{ backgroundColor: "#264262", zIndex: 50 }} // Increased z-index to 50
+        style={{ backgroundColor: "#264262", zIndex: 50 }}
         className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -201,6 +224,27 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </li>
         </ul>
       </div>
+
+      {/* Profile Modal */}
+      <Dialog open={profileModalOpen} onClose={closeProfileModal}>
+        <DialogTitle>User Profile</DialogTitle>
+        <DialogContent>
+          <div className="flex flex-col items-center">
+            <img
+              src={userProfile.image}
+              alt="Profile"
+              className="w-64 h-64 rounded-full object-cover mb-4"
+            />
+            <p className="font-semibold text-lg">{userProfile.name}</p>
+            <p className="text-sm">{userProfile.role}</p>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeProfileModal} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
