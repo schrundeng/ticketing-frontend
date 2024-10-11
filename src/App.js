@@ -13,45 +13,49 @@ import TicketStatus from "./pages/user/ticketStatus.js";
 import CombinedNavbarSidebarPimpinan from "./pages/dashboard/navbarPimpinan.js";
 import PrivateRoute from "./pages/components/PrivateRoute.js";
 import { useState } from "react";
+import NavbarUser from "./pages/user/navbarUser.js";
+import { SnackbarProvider } from "./pages/components/SnackbarContext.js";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility 
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<SignIn />} />
+    <SnackbarProvider>
+      {" "}
+      {/* Moved SnackbarProvider to wrap the entire Router */}
+      <Router>
+        <Routes>
+          <Route path="/" element={<SignIn />} />
 
-        {/* Protect all other routes using PrivateRoute */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebar
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <Dashboard />
+          {/* Protect all other routes using PrivateRoute */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <div className="flex h-screen">
+                  <CombinedNavbarSidebar
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                  />
+                  <div
+                    className={`flex flex-col flex-1 transition-all duration-300 ${
+                      sidebarOpen ? "ml-72" : "ml-0"
+                    }`}
+                    style={{
+                      marginTop: "4rem",
+                      width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                    }} // Adjust width
+                  >
+                    <Dashboard />
+                  </div>
                 </div>
-              </div>
-            </PrivateRoute>
-          }
-        />
+              </PrivateRoute>
+            }
+          />
 
         <Route
           path="/pengelola"
           element={
-            <PrivateRoute>
               <div className="flex h-screen">
                 <CombinedNavbarSidebar
                   sidebarOpen={sidebarOpen}
@@ -71,174 +75,124 @@ function App() {
                   </div>
                 </div>
               </div>
-            </PrivateRoute>
           }
         />
 
-        <Route
-          path="/ticket"
-          element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebar
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <div className="w-full p-3 overflow-x-auto">
-                    <TicketTable />
+          <Route
+            path="/ticket"
+            element={
+              <PrivateRoute>
+                <div className="flex h-screen">
+                  <CombinedNavbarSidebar
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                  />
+                  <div
+                    className={`flex flex-col flex-1 transition-all duration-300 ${
+                      sidebarOpen ? "ml-72" : "ml-0"
+                    }`}
+                    style={{
+                      marginTop: "4rem",
+                      width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                    }} // Adjust width
+                  >
+                    <div className="w-full p-3 overflow-x-auto">
+                      <TicketTable />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </PrivateRoute>
-          }
-        />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/form"
-          element={
-            <PrivateRoute>
-              <div className="flex h-screen justify-center items-center w-full">
-                <div className="flex flex-col flex-1 max-w-full">
-                  <Form />
+          <Route
+            path="/form"
+            element={
+              <PrivateRoute>
+                <NavbarUser />
+                <div className="flex h-screen justify-center items-center w-full">
+                  <div className="flex flex-col flex-1 max-w-full">
+                    <Form />
+                  </div>
                 </div>
-              </div>
-            </PrivateRoute>
-          }
-        />
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/chat"
-          element={
-            <PrivateRoute>
-              <div>
-                <ChatPage />
-              </div>
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <NavbarUser />
+                <div className="flex h-screen justify-center items-center w-full">
+                  <div className="flex flex-col flex-1 max-w-full">
+                    <ChatPage />
+                  </div>
+                </div>
+              </PrivateRoute>
+            }
+          />
 
-        <Route
-          path="/ticketstatus"
-          element={
-            <PrivateRoute>
-              <div>
-                <TicketStatus />
-              </div>
-            </PrivateRoute>
-          }
-        />
+          <Route
+            path="/ticketstatus"
+            element={
+              <PrivateRoute>
+                <NavbarUser />
+                <div className="flex h-screen justify-center items-center w-full">
+                  <div className="flex flex-col flex-1 max-w-full">
+                    <TicketStatus />
+                  </div>
+                </div>
+              </PrivateRoute>
+            }
+          />
 
         <Route
           path="/dashboardpengelola"
           element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebarOperator
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <div className="w-full p-3 overflow-x-auto">
-                    <TicketTable />
-                  </div>
+            <div className="flex h-screen">
+              <CombinedNavbarSidebarOperator
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+              />
+              <div
+                className={`flex flex-col flex-1 transition-all duration-300 ${
+                  sidebarOpen ? "ml-72" : "ml-0"
+                }`}
+                style={{
+                  marginTop: "4rem",
+                  width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                }} // Adjust width
+              >
+                <div className="w-full p-3 overflow-x-auto">
+                  <TicketTable />
                 </div>
               </div>
-            </PrivateRoute>
+            </div>
           }
         />
         <Route
           path="/message"
           element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebarOperator
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <div className="w-full p-3 overflow-x-auto">
-                    <Message />
-                  </div>
+            <div className="flex h-screen">
+              <CombinedNavbarSidebarOperator
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+              />
+              <div
+                className={`flex flex-col flex-1 transition-all duration-300 ${
+                  sidebarOpen ? "ml-72" : "ml-0"
+                }`}
+                style={{
+                  marginTop: "4rem",
+                  width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                }} // Adjust width
+              >
+                <div className="w-full p-3 overflow-x-auto">
+                  <Message />
                 </div>
               </div>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboardpimpinan"
-          element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebarPimpinan
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <div className="w-full overflow-x-auto">
-                    <Dashboard />
-                  </div>
-                </div>
-              </div>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/ticketpimpinan"
-          element={
-            <PrivateRoute>
-              <div className="flex h-screen">
-                <CombinedNavbarSidebarPimpinan
-                  sidebarOpen={sidebarOpen}
-                  setSidebarOpen={setSidebarOpen}
-                />
-                <div
-                  className={`flex flex-col flex-1 transition-all duration-300 ${
-                    sidebarOpen ? "ml-72" : "ml-0"
-                  }`}
-                  style={{
-                    marginTop: "4rem",
-                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
-                  }} // Adjust width
-                >
-                  <div className="w-full p-3 overflow-x-auto">
-                    <TicketTable />
-                  </div>
-                </div>
-              </div>
-            </PrivateRoute>
+            </div>
           }
         />
       </Routes>

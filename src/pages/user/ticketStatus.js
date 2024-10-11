@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import NavbarUser from "./navbarUser.js";
 import axios from "axios";
+import { Alert } from "@mui/material";
 
 const TicketStatus = () => {
   const [ticket, setTicket] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Fetch ticket data on component mount
+  // Fetch ticket data and categories on component mount
   useEffect(() => {
-    const fetchTicket = async () => {
+    const fetchTicketAndCategories = async () => {
       const token = localStorage.getItem("token");
-      const ticketId = "f33e9a1d-08a4-4705-bc56-bd84e2b4a207"; // Replace with dynamic ticket ID logic
+      const ticketId = localStorage.getItem("ticket_id"); // Replace with dynamic ticket ID logic
 
       if (!token) {
         setError("No token found. Please log in.");
@@ -20,7 +22,8 @@ const TicketStatus = () => {
       }
 
       try {
-        const response = await axios.get(
+        // Fetch ticket
+        const ticketResponse = await axios.get(
           `http://localhost:8000/api/user/ticket/getTicketId/${ticketId}`,
           {
             headers: {
@@ -29,23 +32,44 @@ const TicketStatus = () => {
           }
         );
 
-        if (response.status === 200) {
-          // Accessing the ticket data from the response
-          setTicket(response.data.ticket); // Update this line
-          setLoading(false);
+        if (ticketResponse.status === 200) {
+          setTicket(ticketResponse.data.ticket);
         } else {
           setError("Failed to fetch ticket.");
-          setLoading(false);
         }
+
+        // Fetch categories
+        const categoryResponse = await axios.get(
+          `http://localhost:8000/api/user/ticket/getAllCategory`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (categoryResponse.status === 200) {
+          setCategories(categoryResponse.data);
+        } else {
+          setError("Failed to fetch categories.");
+        }
+
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching ticket:", error);
-        setError("An error occurred while fetching the ticket.");
+        console.error("Error fetching ticket or categories:", error);
+        setError("Error fetching data.");
         setLoading(false);
       }
     };
 
-    fetchTicket();
+    fetchTicketAndCategories();
   }, []);
+
+  // Function to get category name by id
+  const getCategoryName = (id_category) => {
+    const category = categories.find((cat) => cat.id_category === id_category);
+    return category ? category.name : "Unknown Category";
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -58,13 +82,13 @@ const TicketStatus = () => {
       case 1: // Assuming 1 means "pending"
         return (
           <span className="text-green-500">
-            <i className="fas fa-spinner"></i> Finished
+            <i className="fas fa-check-circle"></i> Finished
           </span>
         );
       case 2: // Assuming 2 means "finished"
         return (
           <span className="text-yellow-500">
-            <i className="fas fa-check-circle"></i> Pending
+            <i className="fas fa-spinner"></i> Pending
           </span>
         );
       default:
@@ -86,7 +110,6 @@ const TicketStatus = () => {
           zIndex: -1,
         }}
       ></div>
-      <NavbarUser />
       {/* Ticket Status Content */}
       <div className="relative bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full sm:w-4/5 md:w-3/4 lg:w-1/2 xl:w-1/3 bg-opacity-80 mx-4 sm:mx-6 md:mx-8 backdrop-blur-md">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
@@ -118,7 +141,9 @@ const TicketStatus = () => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Category:
                 </label>
-                <p className="text-gray-800">{ticket.id_category}</p>
+                <p className="text-gray-800">
+                  {getCategoryName(ticket.id_category)}
+                </p>
               </div>
 
               <div className="mb-4">

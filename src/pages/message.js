@@ -1,49 +1,82 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const Message = () => {
-  // Dummy chat data with profile images for users and operator
-  const chatData = {
-    User1: {
-      profileImg: "https://i.redd.it/os9z4v7ljol81.jpg",
-      messages: [
-        { text: ":3", sender: "User1" },
-        { text: "kys", sender: "Operator" },
-      ],
-    },
-    User2: {
-      profileImg: "https://randomuser.me/api/portraits/women/2.jpg",
-      messages: [
-        { text: "Can you help me with my account?", sender: "User2" },
-        { text: "Sure! What’s the issue?", sender: "Operator" },
-      ],
-    },
-    User3: {
-      profileImg: "https://randomuser.me/api/portraits/men/3.jpg",
-      messages: [
-        { text: "What’s the latest update on my request?", sender: "User3" },
-        {
-          text: "We are still working on it. Will update soon!",
-          sender: "Operator",
-        },
-      ],
-    },
-  };
-
-  const operatorProfileImg =
-    "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"; // Operator's profile image
-
-  const [selectedUser, setSelectedUser] = useState("User1"); // Default to User1
-  const [messages, setMessages] = useState(chatData[selectedUser].messages); // State for chat messages
+  const [users, setUsers] = useState([]); // State for storing users
+  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
+  const [messages, setMessages] = useState([]); // State for chat messages
   const [newMessage, setNewMessage] = useState(""); // State for new message input
   const [loading, setLoading] = useState(false); // State for loading indicator
   const messageEndRef = useRef(null); // Reference to scroll to the bottom
 
-  // When switching users, update the chat messages
+  const operatorProfileImg =
+    "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"; // Operator's profile image
+
+  // Function to fetch user data
+  const fetchUserData = async () => {
+    const token = localStorage.getItem("token"); // Get the token from local storage
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/chat/pengelola/get-user-data",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (data.message === "User data retrieved successfully") {
+        setUsers(data.data); // Store the user data
+        setSelectedUser(data.data[0]); // Select the first user by default
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  // Function to fetch messages for the selected user
+  const fetchMessages = async (userId) => {
+    const token = localStorage.getItem("token"); // Get the token from local storage
+    const formData = new FormData(); // Create FormData object
+    formData.append("to_id_user", userId); // Append the user ID to FormData
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/chat/pengelola/get-message",
+        {
+          method: "POST", // Change to POST request
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData, // Send FormData as the body
+        }
+      );
+
+      const data = await response.json();
+      if (data.message === "Messages retrieved successfully") {
+        const formattedMessages = data.data.map((msg) => ({
+          text: msg.message,
+          sender: msg.from_name, // Use from_name for the sender's name
+        }));
+        setMessages(formattedMessages); // Store the formatted messages
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  // Fetch user data on component mount
   useEffect(() => {
-    setMessages(chatData[selectedUser].messages);
+    fetchUserData();
+  }, []);
+
+  // Fetch messages when a new user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      fetchMessages(selectedUser.id_user); // Fetch messages for the selected user
+    }
   }, [selectedUser]);
 
-  // Scroll to the bottom when a new message is added
+  // Scroll to the bottom when messages are updated
   useEffect(() => {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -56,14 +89,12 @@ const Message = () => {
     if (newMessage.trim()) {
       setLoading(true); // Set loading state to true
       setTimeout(() => {
-        // Simulate a network request
         const updatedMessages = [
           ...messages,
           { text: newMessage, sender: "Operator" },
         ];
         setMessages(updatedMessages);
         setNewMessage(""); // Clear input field
-        chatData[selectedUser].messages = updatedMessages; // Update the dummy data for current user
         setLoading(false); // Reset loading state
       }, 1000);
     }
@@ -75,17 +106,17 @@ const Message = () => {
       <div className="w-64 bg-gray-800 text-white flex-shrink-0 p-4 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold mb-6">Chats</h2>
         <ul>
-          {Object.keys(chatData).map((user) => (
+          {users.map((user) => (
             <li
-              key={user}
+              key={user.id_user}
               onClick={() => setSelectedUser(user)}
               className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors duration-300 ${
-                selectedUser === user
+                selectedUser && selectedUser.id_user === user.id_user
                   ? "bg-gray-700"
                   : "bg-gray-900 hover:bg-gray-700"
               }`}
             >
-              {user}
+              {user.name} {/* Update to display user name */}
             </li>
           ))}
         </ul>
@@ -95,12 +126,16 @@ const Message = () => {
       <div className="flex-1 flex flex-col p-4">
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-300 text-lg font-semibold text-gray-700 bg-white rounded-lg shadow-sm mb-4 flex items-center">
-          <img
-            src={chatData[selectedUser].profileImg}
-            alt={`${selectedUser} profile`}
-            className="w-10 h-10 rounded-full mr-4"
-          />
-          Chat with {selectedUser}
+          {selectedUser && (
+            <>
+              <img
+                src={selectedUser.profileImg || operatorProfileImg} // Use user profile image or operator image
+                alt={`${selectedUser.name} profile`}
+                className="w-10 h-10 rounded-full mr-4"
+              />
+              Chat with {selectedUser.name}
+            </>
+          )}
         </div>
 
         {/* Messages Container */}
@@ -120,7 +155,7 @@ const Message = () => {
                 {message.sender === "Operator" ? (
                   <>
                     <div className="inline-block max-w-xs px-4 py-2 rounded-xl shadow bg-blue-500 text-white">
-                      <strong>{message.sender}:</strong> {message.text}
+                      <strong>{message.sender}:</strong> {message.message}
                     </div>
                     <img
                       src={operatorProfileImg}
@@ -131,12 +166,12 @@ const Message = () => {
                 ) : (
                   <>
                     <img
-                      src={chatData[selectedUser].profileImg}
+                      src={selectedUser.profileImg || operatorProfileImg} // Use user profile image or operator image
                       alt={`${message.sender} profile`}
                       className="w-8 h-8 rounded-full mr-2"
                     />
                     <div className="inline-block max-w-xs px-4 py-2 rounded-xl shadow bg-white text-gray-800 border border-gray-300">
-                      <strong>{message.sender}:</strong> {message.text}
+                      <strong>{message.sender}:</strong> {message.message}
                     </div>
                   </>
                 )}

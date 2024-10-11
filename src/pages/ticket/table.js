@@ -38,7 +38,6 @@ const TicketTable = () => {
             user: ticket.id_user, // Assuming this is the user name, adjust if needed
             issue: ticket.description,
             status: ticket.status_note,
-            solution: "N/A", // Set a default for solution, can be updated later
           }));
           setTickets(fetchedTickets);
         } else {
@@ -79,26 +78,33 @@ const TicketTable = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ solution: editingTicket.solution }), // Send updated solution
+        body: JSON.stringify({ ticket_note: editingTicket.ticket_note }), // Send updated ticket_note
       });
 
-      const data = await response.json();
+      // Check if response is ok
+      if (response.ok) {
+        const data = await response.json(); // Parse the JSON response
+        console.log(data.message); // Log the success message (if any)
 
-      if (data.status === "success") {
+        // Update tickets state
         setTickets(
           tickets.map((ticket) =>
             ticket.id === editingTicket.id
               ? {
                   ...ticket,
                   status: editingTicket.status,
-                  solution: editingTicket.solution,
+                  ticket_note: editingTicket.ticket_note,
                 }
               : ticket
           )
         );
         handleClose(); // Close the modal after saving
       } else {
-        console.error("Failed to update ticket:", data.message);
+        const data = await response.json(); // Parse the error response
+        console.error(
+          "Failed to update ticket:",
+          data.message || response.statusText
+        );
       }
     } catch (error) {
       console.error("Error updating ticket:", error);
@@ -177,7 +183,7 @@ const TicketTable = () => {
     .sort((a, b) => {
       const getValue = (ticket, column) => {
         if (column === "date") return new Date(ticket.date);
-        if (column === "user" || column === "issue" || column === "solution")
+        if (column === "user" || column === "issue")
           return ticket[column].toLowerCase();
         return ticket[column];
       };
@@ -329,19 +335,6 @@ const TicketTable = () => {
                     : "-"}
                 </span>
               </th>
-              <th
-                className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("solution")}
-              >
-                Solution{" "}
-                <span>
-                  {sortColumn === "solution"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : "-"}
-                </span>
-              </th>
               <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
@@ -357,7 +350,7 @@ const TicketTable = () => {
                     <span
                       className={`inline-block px-3 py-1 rounded-full font-bold ${
                         ticket.status === "Pending"
-                          ? "bg-red-600 text-white"
+                          ? "bg-gray-600 text-white"
                           : ticket.status === "Resolved"
                           ? "bg-green-600 text-white"
                           : ticket.status === "On Going"
@@ -368,7 +361,6 @@ const TicketTable = () => {
                       {ticket.status}
                     </span>
                   </td>
-                  <td className="p-3">{ticket.solution}</td>
                   <td className="p-3">
                     <button
                       onClick={() => handleOpen(ticket)}
@@ -460,12 +452,12 @@ const TicketTable = () => {
                   </label>
                   <input
                     type="text"
-                    name="solution"
-                    value={editingTicket.solution}
+                    name="ticket_note"
+                    value={editingTicket.ticket_note}
                     onChange={(e) =>
                       setEditingTicket({
                         ...editingTicket,
-                        solution: e.target.value,
+                        ticket_note: e.target.value,
                       })
                     }
                     className="border rounded-md p-2 w-full"

@@ -30,7 +30,7 @@ const ChatPage = () => {
 
         if (response.status === 200) {
           setMessages(response.data.data);
-          console.log(response.data)
+          console.log(response.data);
           scrollToBottom();
         }
       } catch (error) {
@@ -129,7 +129,6 @@ const ChatPage = () => {
           zIndex: -1,
         }}
       ></div>
-      <NavbarUser />
       <div className="relative bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full sm:w-4/5 md:w-3/4 lg:w-1/2 xl:w-1/3 bg-opacity-80 mx-4 sm:mx-6 md:mx-8 backdrop-blur-md">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">Chat</h2>
 
