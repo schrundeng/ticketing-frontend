@@ -39,7 +39,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       const token = localStorage.getItem("token");
 
       // Make the API request to log out the admin
-      await axios.patch(
+      await axios.patch( 
         "http://localhost:8000/api/pengelola/logout",
         {},
         {

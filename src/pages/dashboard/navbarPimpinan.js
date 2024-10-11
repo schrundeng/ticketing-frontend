@@ -15,7 +15,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();  
   const location = useLocation();
 
   const userProfile = {

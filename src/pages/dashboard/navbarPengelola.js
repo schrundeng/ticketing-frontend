@@ -32,7 +32,7 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   // Logout handling with API
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); 
  
       await axios.patch(
         "http://localhost:8000/api/pengelola/logout",

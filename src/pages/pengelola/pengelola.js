@@ -144,7 +144,7 @@ const PengelolaTable = () => {
                 </th>
                 <th
                   onClick={() => toggleSortOrder("role")}
-                  className="p-3 text-left cursor-pointer"
+                  className="p-3 text-left cursor-pointer" 
                 >
                   Role{" "}
                   {sortColumn === "role"
