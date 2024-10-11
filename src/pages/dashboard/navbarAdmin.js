@@ -50,7 +50,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       );
 
       // Remove the token from localStorage after successful logout
-      localStorage.removeItem("token");
+      localStorage.removeItem("token"); 
 
       // Redirect to the login page
       navigate("/");

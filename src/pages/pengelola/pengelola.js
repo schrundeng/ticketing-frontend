@@ -151,7 +151,7 @@ const PengelolaTable = () => {
                     ? sortOrder === "asc"
                       ? "▲"
                       : "▼"
-                    : ""}
+                    : ""} 
                 </th>
                 <th className="p-3 text-left">Actions</th>
               </tr>

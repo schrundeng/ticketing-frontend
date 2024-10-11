@@ -15,7 +15,7 @@ import PrivateRoute from "./pages/components/PrivateRoute.js";
 import { useState } from "react";
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility 
 
   return (
     <Router>
