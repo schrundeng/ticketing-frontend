@@ -5,14 +5,24 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Button, // Importing Button from MUI
 } from "@mui/material";
 
 const PengelolaTable = () => {
   const [users, setUsers] = useState([
-    { id: 1, username: "john_doe", email: "john@example.com", role: "Operator" },
+    {
+      id: 1,
+      username: "john_doe",
+      email: "john@example.com",
+      role: "Operator",
+    },
     { id: 2, username: "jane_smith", email: "jane@example.com", role: "Admin" },
-    { id: 3, username: "alice_johnson", email: "alice@example.com", role: "Pimpinan" },
-    // Add more users as needed
+    {
+      id: 3,
+      username: "alice_johnson",
+      email: "alice@example.com",
+      role: "Pimpinan",
+    },
   ]);
 
   const [open, setOpen] = useState(false);
@@ -40,13 +50,39 @@ const PengelolaTable = () => {
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     const fieldA = a[sortColumn].toString().toLowerCase();
     const fieldB = b[sortColumn].toString().toLowerCase();
-    return sortOrder === "asc" ? fieldA.localeCompare(fieldB) : fieldB.localeCompare(fieldA);
+    return sortOrder === "asc"
+      ? fieldA.localeCompare(fieldB)
+      : fieldB.localeCompare(fieldA);
   });
 
   const indexOfLastUser = currentPage * rowsPerPage;
   const indexOfFirstUser = indexOfLastUser - rowsPerPage;
   const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(sortedUsers.length / rowsPerPage);
+
+  const handleOpen = (user = null) => {
+    setEditingUser(user);
+    setNewUser(user ? user : { username: "", email: "", role: "" });
+    setOpen(true);
+  };
+
+  const handleSave = () => {
+    if (editingUser) {
+      setUsers(
+        users.map((user) =>
+          user.id === editingUser.id ? { ...user, ...newUser } : user
+        )
+      );
+    } else {
+      // Generate a new unique ID
+      const newId =
+        users.length > 0 ? Math.max(users.map((user) => user.id)) + 1 : 1;
+      setUsers([...users, { id: newId, ...newUser }]);
+    }
+    setNewUser({ username: "", email: "", role: "" });
+    setEditingUser(null);
+    setOpen(false);
+  };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -57,7 +93,7 @@ const PengelolaTable = () => {
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Pengelola Users</h2>
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => handleOpen()}
           className="mb-4 bg-blue-500 text-white hover:bg-blue-600 py-2 px-4 rounded-lg"
         >
           Add New User
@@ -69,26 +105,55 @@ const PengelolaTable = () => {
           fullWidth
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4"
+          className="mb-4" // Existing margin
+          style={{ marginBottom: "1rem" }} // Additional margin
         />
 
         <div className="overflow-x-auto">
           <table className="w-full table-auto border-collapse">
             <thead>
               <tr className="bg-gray-200 text-gray-700 border-b">
-                <th onClick={() => toggleSortOrder("id")} className="p-3 cursor-pointer">
-                  ID {sortColumn === "id" ? (sortOrder === "asc" ? "▲" : "▼") : "-"}
+                <th
+                  onClick={() => toggleSortOrder("id")}
+                  className="p-3 text-left cursor-pointer"
+                >
+                  ID{" "}
+                  {sortColumn === "id" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
                 </th>
-                <th onClick={() => toggleSortOrder("username")} className="p-3 cursor-pointer">
-                  Username {sortColumn === "username" ? (sortOrder === "asc" ? "▲" : "▼") : "-"}
+                <th
+                  onClick={() => toggleSortOrder("username")}
+                  className="p-3 text-left cursor-pointer"
+                >
+                  Username{" "}
+                  {sortColumn === "username"
+                    ? sortOrder === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
-                <th onClick={() => toggleSortOrder("email")} className="p-3 cursor-pointer">
-                  Email {sortColumn === "email" ? (sortOrder === "asc" ? "▲" : "▼") : "-"}
+                <th
+                  onClick={() => toggleSortOrder("email")}
+                  className="p-3 text-left cursor-pointer"
+                >
+                  Email{" "}
+                  {sortColumn === "email"
+                    ? sortOrder === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
                 </th>
-                <th onClick={() => toggleSortOrder("role")} className="p-3 cursor-pointer">
-                  Role {sortColumn === "role" ? (sortOrder === "asc" ? "▲" : "▼") : "-"}
+                <th
+                  onClick={() => toggleSortOrder("role")}
+                  className="p-3 text-left cursor-pointer" 
+                >
+                  Role{" "}
+                  {sortColumn === "role"
+                    ? sortOrder === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""} 
                 </th>
-                <th className="p-3">Actions</th>
+                <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -100,13 +165,15 @@ const PengelolaTable = () => {
                   <td className="p-3">{user.role}</td>
                   <td className="p-3">
                     <button
-                      onClick={() => setEditingUser(user)}
+                      onClick={() => handleOpen(user)}
                       className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mr-2"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => setUsers(users.filter(u => u.id !== user.id))}
+                      onClick={() =>
+                        setUsers(users.filter((u) => u.id !== user.id))
+                      }
                       className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                     >
                       Delete
@@ -126,7 +193,7 @@ const PengelolaTable = () => {
               value={rowsPerPage}
               onChange={(e) => {
                 setRowsPerPage(parseInt(e.target.value, 10));
-                setCurrentPage(1); // Reset to first page when rows per page changes
+                setCurrentPage(1);
               }}
               className="ml-2 border rounded px-3 py-2"
             >
@@ -157,43 +224,46 @@ const PengelolaTable = () => {
         </div>
 
         <Dialog open={open} onClose={() => setOpen(false)}>
-          <DialogTitle>{editingUser ? "Edit User" : "Add New User"}</DialogTitle>
+          <DialogTitle>
+            {editingUser ? "Edit User" : "Add New User"}
+          </DialogTitle>
           <DialogContent>
             <TextField
               label="Username"
               variant="outlined"
               fullWidth
+              margin="normal" // Add margin here
               value={newUser.username}
-              onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-              className="mb-4"
+              onChange={(e) =>
+                setNewUser({ ...newUser, username: e.target.value })
+              }
             />
             <TextField
               label="Email"
               variant="outlined"
               fullWidth
+              margin="normal" // Add margin here
               value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              className="mb-4"
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
             />
             <TextField
               label="Role"
               variant="outlined"
               fullWidth
+              margin="normal" // Add margin here
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              className="mb-4"
             />
           </DialogContent>
           <DialogActions>
-            <button onClick={() => setOpen(false)} className="px-4 py-2 bg-gray-300 rounded">
+            <Button onClick={() => setOpen(false)} color="primary">
               Cancel
-            </button>
-            <button
-              onClick={() => setUsers([...users, { id: users.length + 1, ...newUser }])}
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-            >
+            </Button>
+            <Button onClick={handleSave} color="primary">
               Save
-            </button>
+            </Button>
           </DialogActions>
         </Dialog>
       </div>

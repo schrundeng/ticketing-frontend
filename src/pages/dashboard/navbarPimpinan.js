@@ -1,62 +1,50 @@
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faChevronDown,
   faSignOutAlt,
-  faTachometerAlt,
-  faUsers,
+  faChevronDown,
   faTicketAlt,
   faBars,
+  faTachometerAlt,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 
-const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState({
-    name: "Makoto Alghifari",
-    role: "Admin datang",
-    image: "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
-  });
+  const navigate = useNavigate();  
   const location = useLocation();
-  const navigate = useNavigate();
+
+  const userProfile = {
+    name: "Dr. Tirta",
+    role: "Pimpinan",
+    image: "https://preview.redd.it/r21hij26xbic1.png?width=421&format=png&auto=webp&s=76f3b4801830c419cd3427f47e2d9a57c74461be",
+  };
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
 
+  // Logout handling with API
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-
-      // Make the API request to log out the admin
-      await axios.patch( 
+      await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      // Remove the token from localStorage after successful logout
-      localStorage.removeItem("token"); 
-
-      // Redirect to the login page
+      localStorage.removeItem("token");
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Handle the error, maybe show a message to the user
     }
   };
 
@@ -64,16 +52,14 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 728) {
-        setSidebarOpen(false); // Close sidebar on mobile by default
+        setSidebarOpen(false);
       } else {
-        setSidebarOpen(true); // Open sidebar on larger screens
+        setSidebarOpen(true);
       }
     };
 
-    // Set initial sidebar state on load
     handleResize();
 
-    // Add event listener on window resize
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -105,6 +91,9 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
+          {/* Icons */}
+
+          {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
@@ -114,8 +103,8 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <img
                 src={userProfile.image}
                 alt="User"
-                className="w-10 h-10 rounded-full object-cover"
-                onClick={openProfileModal} // Open modal on click
+                className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                onClick={openProfileModal}
               />
               <button
                 className="ml-2 text-gray-600 focus:outline-none"
@@ -149,8 +138,8 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       {/* Sidebar */}
       <div
-        style={{ backgroundColor: "#264262", zIndex: 50 }}
-        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 ${
+        style={{ backgroundColor: "#264262", zIndex: 40 }}
+        className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 sidebar ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -173,16 +162,16 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <ul className="text-gray-300">
           <li
             className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/dashboard"
+              location.pathname === "/dashboardpimpinan"
                 ? "bg-[#213751] text-white rounded-lg"
                 : ""
             }`}
           >
             <FontAwesomeIcon icon={faTachometerAlt} size="lg" />
             <Link
-              to="/dashboard"
+              to="/dashboardpimpinan"
               className={`ml-3 ${
-                location.pathname === "/dashboard" ? "font-semibold" : ""
+                location.pathname === "/dashboardpimpinan" ? "font-semibold" : ""
               }`}
             >
               Dashboard
@@ -190,33 +179,16 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </li>
           <li
             className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/pengelola"
-                ? "bg-[#213751] text-white rounded-lg"
-                : ""
-            }`}
-          >
-            <FontAwesomeIcon icon={faUsers} size="lg" />
-            <Link
-              to="/pengelola"
-              className={`ml-3 ${
-                location.pathname === "/pengelola" ? "font-semibold" : ""
-              }`}
-            >
-              Pengelola
-            </Link>
-          </li>
-          <li
-            className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/ticket"
+              location.pathname === "/ticketpimpinan"
                 ? "bg-[#213751] text-white rounded-lg"
                 : ""
             }`}
           >
             <FontAwesomeIcon icon={faTicketAlt} size="lg" />
             <Link
-              to="/ticket"
+              to="/ticketpimpinan"
               className={`ml-3 ${
-                location.pathname === "/ticket" ? "font-semibold" : ""
+                location.pathname === "/ticketpimpinan" ? "font-semibold" : ""
               }`}
             >
               Ticket
@@ -249,4 +221,4 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-export default CombinedNavbarSidebar;
+export default CombinedNavbarSidebarPimpinan;

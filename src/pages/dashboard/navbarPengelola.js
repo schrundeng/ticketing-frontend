@@ -1,4 +1,3 @@
-// src/components/CombinedNavbarSidebarOperator.js
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,11 +11,19 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
 
 const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const userProfile = {
+    name: "Vita",
+    role: "Operator",
+    image: "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj", // Replace with actual user data
+  };
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -25,49 +32,48 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   // Logout handling with API
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      // Make the API request to log out the operator
+      const token = localStorage.getItem("token"); 
+ 
       await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${token}`, 
           },
         }
       );
 
-      // Remove the token from localStorage after successful logout
       localStorage.removeItem("token");
-
-      // Redirect to the login page
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Handle the error, maybe show a message to the user
     }
   };
 
-  // Check window width to set default sidebar state
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 728) {
-        setSidebarOpen(false); // Close sidebar on mobile by default
+        setSidebarOpen(false);
       } else {
-        setSidebarOpen(true); // Open sidebar on larger screens
+        setSidebarOpen(true);
       }
     };
 
-    // Set initial sidebar state on load
     handleResize();
-
-    // Add event listener on window resize
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, [setSidebarOpen]);
+
+  const openProfileModal = () => {
+    setProfileModalOpen(true);
+  };
+
+  const closeProfileModal = () => {
+    setProfileModalOpen(false);
+  };
 
   return (
     <div>
@@ -76,9 +82,8 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#FFA300", zIndex: 40 }}
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
-        {/* Toggle Button for Sidebar */}
         <button
-          className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded" // Neater styling
+          className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded"
           onClick={() => setSidebarOpen((prev) => !prev)}
         >
           <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
@@ -86,24 +91,26 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Icons */}
-          <div className="flex items-center space-x-2">
-            <button className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <FontAwesomeIcon icon={faEnvelope} />
-            </button>
-          </div>
+          {/* Envelope Icon - Redirect to Message Page */}
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => navigate("/message")} // Updated to navigate to the message page
+          >
+            <FontAwesomeIcon icon={faEnvelope} />
+          </button>
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">Makoto Alghifari</p>
-                <p className="text-sm text-right">Operator</p>
+                <p className="font-semibold">{userProfile.name}</p>
+                <p className="text-sm text-right">{userProfile.role}</p>
               </div>
               <img
-                src="https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"
+                src={userProfile.image}
                 alt="User"
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                onClick={openProfileModal}
               />
               <button
                 className="ml-2 text-gray-600 focus:outline-none"
@@ -140,14 +147,13 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#264262", zIndex: 40 }}
         className={`fixed top-0 left-0 h-screen p-5 pt-8 w-72 font-poppins transition-transform duration-300 sidebar ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:block md:w-72`}
+        }`}
       >
-        {/* Close Button */}
         <button
-          className="absolute top-4 right-4 md:hidden text-gray-600 focus:outline-none menu-icon"
+          className="absolute top-3 right-3 text-white"
           onClick={() => setSidebarOpen(false)}
         >
-          <FontAwesomeIcon icon={faBars} size="lg" />
+          <FontAwesomeIcon icon={faTimes} />
         </button>
 
         <div className="flex items-center text-white mb-10">
@@ -192,15 +198,34 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
             <Link
               to="/message"
-              className={`ml-3 ${
-                location.pathname === "/message" ? "font-semibold" : ""
-              }`}
+              className={`ml-3 ${location.pathname === "/message" ? "font-semibold" : ""}`}
             >
               Message
             </Link>
           </li>
         </ul>
       </div>
+
+      {/* Profile Modal */}
+      <Dialog open={profileModalOpen} onClose={closeProfileModal}>
+        <DialogTitle>User Profile</DialogTitle>
+        <DialogContent>
+          <div className="flex flex-col items-center">
+            <img
+              src={userProfile.image}
+              alt="Profile"
+              className="w-64 h-64 rounded-full object-cover mb-4"
+            />
+            <p className="font-semibold text-lg">{userProfile.name}</p>
+            <p className="text-sm">{userProfile.role}</p>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeProfileModal} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
