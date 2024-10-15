@@ -44,13 +44,13 @@ export default function SignInSide() {
     const data = new FormData(event.currentTarget);
     const id = data.get("id");
     const password = data.get("password");
-
+  
     if (id && password) {
-      setLoading(true); // Set loading to true when request starts
+      setLoading(true);
       try {
         let apiUrl = "";
         let requestBody = {};
-
+  
         if (id.length === 12) {
           apiUrl = "http://localhost:8000/api/loginUser";
           requestBody = {
@@ -65,18 +65,35 @@ export default function SignInSide() {
           };
         } else {
           setError("Invalid ID length.");
-          setLoading(false); // Set loading to false if there's an error
+          setLoading(false);
           return;
         }
-
+  
         const response = await axios.post(apiUrl, requestBody);
-
+  
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
-          if (id.length === 12) {
-            navigate("/form");
-          } else if (id.length === 18) {
-            navigate("/dashboardpengelola");
+  
+          // Get user role
+          const token = localStorage.getItem("token");
+          const roleResponse = await axios.get(
+            `http://localhost:8000/api/pengelola/admin/auth/getDataPengelolaId/${id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+  
+          const role = roleResponse.data.role;
+          switch (role) {
+            case "operator":
+              navigate("/dashboardpengelola");
+              break;
+            case "pemimpin":
+              navigate("/dashboardpimpinan");
+              break;
+            case "admin":
+              navigate("/dashboard");
+              break;
+            default:
+              setError("Unknown role.");
           }
         } else {
           setError("Login failed. Please check your credentials.");
@@ -89,12 +106,13 @@ export default function SignInSide() {
           setError("An error occurred. Please try again later.");
         }
       } finally {
-        setLoading(false); // Set loading to false after request finishes
+        setLoading(false);
       }
     } else {
       setError("Please fill out both ID and password fields.");
     }
   };
+  
 
   return (
     <ThemeProvider theme={defaultTheme}>
