@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import PieChart from "./chart"; // Import your pie chart component
-import TicketTable from "../ticket/table";
+import TicketPimpinan from "../ticket/tablePimpinan";
 
 const Dashboard = () => {
   const [ticketOpen, setTicketOpen] = useState(0);
@@ -28,19 +28,19 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData(
-      "http://localhost:8000/api/pengelola/operator/getpendingticket",
+      "http://localhost:8000/api/pengelola/getpendingticket",
       setTicketOpen
     );
     fetchData(
-      "http://localhost:8000/api/pengelola/operator/getongoingticket",
+      "http://localhost:8000/api/pengelola/getongoingticket",
       setTicketInProgress
     );
     fetchData(
-      "http://localhost:8000/api/pengelola/operator/getresolvedticket",
+      "http://localhost:8000/api/pengelola/getresolvedticket",
       setTicketClosed
     );
     fetchData(
-      "http://localhost:8000/api/pengelola/operator/gettotalticketbyweek",
+      "http://localhost:8000/api/pengelola/gettotalticketbyweek",
       setTotalTicketsThisWeek
     );
   }, []);
@@ -80,7 +80,7 @@ const Dashboard = () => {
 
       {/* Ticket Table Section */}
       <div className="w-full p-3 overflow-x-auto">
-        <TicketTable />
+        <TicketPimpinan />
       </div>
     </div>
   );

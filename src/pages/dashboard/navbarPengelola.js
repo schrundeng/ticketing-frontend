@@ -16,13 +16,14 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState(null); // State for user profile
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userProfile = {
+  const dummyProfile = {
     name: "Vita",
     role: "Operator",
-    image: "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj", // Replace with actual user data
+    image: "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj",
   };
 
   const toggleDropdown = () => {
@@ -32,14 +33,14 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   // Logout handling with API
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token"); 
- 
+      const token = localStorage.getItem("token");
+
       await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -51,7 +52,36 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
     }
   };
 
+  // Function to fetch user profile
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId"); // Retrieve user ID from local storage
+
+      if (!userId) {
+        console.error("No user ID found in local storage.");
+        navigate("/"); // Redirect to login if user ID is not found
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setUserProfile(response.data); // Set the fetched user data
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setUserProfile(dummyProfile); // Use dummy profile on error
+    }
+  };
+
   useEffect(() => {
+    fetchUserProfile(); // Fetch user profile when component mounts
+
     const handleResize = () => {
       if (window.innerWidth < 728) {
         setSidebarOpen(false);
@@ -91,23 +121,16 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Envelope Icon - Redirect to Message Page */}
-          <button
-            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={() => navigate("/message")} // Updated to navigate to the message page
-          >
-            <FontAwesomeIcon icon={faEnvelope} />
-          </button>
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">{userProfile.name}</p>
-                <p className="text-sm text-right">{userProfile.role}</p>
+                <p className="font-semibold">{userProfile ? userProfile.name : dummyProfile.name}</p>
+                <p className="text-sm text-right">{userProfile ? userProfile.role : dummyProfile.role}</p>
               </div>
               <img
-                src={userProfile.image}
+                src={userProfile?.image || dummyProfile.image}
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
                 onClick={openProfileModal}
@@ -210,14 +233,16 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
       <Dialog open={profileModalOpen} onClose={closeProfileModal}>
         <DialogTitle>User Profile</DialogTitle>
         <DialogContent>
-          <div className="flex flex-col items-center">
+          <div className="flex items-center">
             <img
-              src={userProfile.image}
-              alt="Profile"
-              className="w-64 h-64 rounded-full object-cover mb-4"
+              src={userProfile?.image || dummyProfile.image}
+              alt="User"
+              className="w-32 h-32 rounded-full object-cover mr-4"
             />
-            <p className="font-semibold text-lg">{userProfile.name}</p>
-            <p className="text-sm">{userProfile.role}</p>
+            <div>
+              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
+              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+            </div>
           </div>
         </DialogContent>
         <DialogActions>

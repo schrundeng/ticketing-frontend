@@ -39,6 +39,11 @@ export default function SignInSide() {
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false); // Add loading state
 
+  React.useEffect(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+  }, []);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -73,11 +78,12 @@ export default function SignInSide() {
   
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
+          localStorage.setItem("userId", id); // Store user ID in local storage
   
           // Get user role
           const token = localStorage.getItem("token");
           const roleResponse = await axios.get(
-            `http://localhost:8000/api/pengelola/admin/auth/getDataPengelolaId/${id}`,
+            `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${id}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
   
@@ -111,8 +117,7 @@ export default function SignInSide() {
     } else {
       setError("Please fill out both ID and password fields.");
     }
-  };
-  
+  };  
 
   return (
     <ThemeProvider theme={defaultTheme}>

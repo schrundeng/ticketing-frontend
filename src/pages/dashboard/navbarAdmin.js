@@ -22,13 +22,46 @@ import {
 const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState({
-    name: "Makoto Alghifari",
-    role: "Admin datang",
-    image: "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
-  });
+  const [userProfile, setUserProfile] = useState(null); // Update to fetch from API
   const location = useLocation();
   const navigate = useNavigate();
+
+  const dummyProfile = {
+    name: "Makoto",
+    role: "Admin",
+    image: "https://i.pinimg.com/originals/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId"); // Retrieve user ID from local storage
+
+      if (!userId) {
+        console.error("No user ID found in local storage.");
+        navigate("/"); // Redirect to login if user ID is not found
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setUserProfile(response.data); // Set the fetched user data
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setUserProfile(dummyProfile); // Set dummy profile on error
+      // Optionally, navigate to the login page or handle error differently
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
 
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
@@ -37,43 +70,31 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
-
-      // Make the API request to log out the admin
-      await axios.patch( 
+      await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      // Remove the token from localStorage after successful logout
-      localStorage.removeItem("token"); 
-
-      // Redirect to the login page
+      localStorage.removeItem("token");
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Handle the error, maybe show a message to the user
     }
   };
 
-  // Check window width to set default sidebar state
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 728) {
-        setSidebarOpen(false); // Close sidebar on mobile by default
+        setSidebarOpen(false);
       } else {
-        setSidebarOpen(true); // Open sidebar on larger screens
+        setSidebarOpen(true);
       }
     };
-
-    // Set initial sidebar state on load
     handleResize();
-
-    // Add event listener on window resize
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -95,7 +116,6 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#FFA300", zIndex: 40 }}
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
-        {/* Toggle Button for Sidebar */}
         <button
           className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded"
           onClick={() => setSidebarOpen((prev) => !prev)}
@@ -103,19 +123,19 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <FontAwesomeIcon icon={sidebarOpen ? faTimes : faBars} />
         </button>
 
-        {/* Right Side: User Info and Icons */}
+        {/* Right Side: User Info */}
         <div className="flex items-center space-x-4 ml-auto">
-          <div className="flex items-center relative dropdown-container">
-            <div className="flex items-center">
+          {userProfile ? (
+            <div className="flex items-center relative dropdown-container">
               <div className="ml-5 mr-2 text-black-600">
                 <p className="font-semibold">{userProfile.name}</p>
                 <p className="text-sm text-right">{userProfile.role}</p>
               </div>
               <img
-                src={userProfile.image}
+                src={userProfile?.image || dummyProfile.image} // Fallback image URL
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover"
-                onClick={openProfileModal} // Open modal on click
+                onClick={openProfileModal}
               />
               <button
                 className="ml-2 text-gray-600 focus:outline-none"
@@ -124,26 +144,28 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <FontAwesomeIcon icon={faChevronDown} />
               </button>
             </div>
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                aria-hidden={!dropdownOpen}
-              >
-                <ul className="py-2">
-                  <li
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    <FontAwesomeIcon
-                      icon={faSignOutAlt}
-                      className="mr-2 text-gray-600"
-                    />
-                    Log Out
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+          ) : (
+            <p>Loading...</p>
+          )}
+          {dropdownOpen && (
+            <div
+              className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+              aria-hidden={!dropdownOpen}
+            >
+              <ul className="py-2">
+                <li
+                  className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <FontAwesomeIcon
+                    icon={faSignOutAlt}
+                    className="mr-2 text-gray-600"
+                  />
+                  Log Out
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -207,16 +229,16 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </li>
           <li
             className={`mb-4 p-1 flex items-center ${
-              location.pathname === "/ticket"
+              location.pathname === "/ticketadmin"
                 ? "bg-[#213751] text-white rounded-lg"
                 : ""
             }`}
           >
             <FontAwesomeIcon icon={faTicketAlt} size="lg" />
             <Link
-              to="/ticket"
+              to="/ticketadmin"
               className={`ml-3 ${
-                location.pathname === "/ticket" ? "font-semibold" : ""
+                location.pathname === "/ticketadmin" ? "font-semibold" : ""
               }`}
             >
               Ticket
@@ -229,14 +251,16 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       <Dialog open={profileModalOpen} onClose={closeProfileModal}>
         <DialogTitle>User Profile</DialogTitle>
         <DialogContent>
-          <div className="flex flex-col items-center">
+          <div className="flex items-center">
             <img
-              src={userProfile.image}
-              alt="Profile"
-              className="w-64 h-64 rounded-full object-cover mb-4"
+              src={userProfile?.image || dummyProfile.image}
+              alt="User"
+              className="w-32 h-32 rounded-full object-cover mr-4"
             />
-            <p className="font-semibold text-lg">{userProfile.name}</p>
-            <p className="text-sm">{userProfile.role}</p>
+            <div>
+              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
+              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+            </div>
           </div>
         </DialogContent>
         <DialogActions>
