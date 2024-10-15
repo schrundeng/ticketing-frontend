@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const TicketTable = () => {
+const TicketAdmin = () => {
   const [tickets, setTickets] = useState([]); // Initialize with an empty array
   const [open, setOpen] = useState(false);
   const [editingTicket, setEditingTicket] = useState(null);
@@ -108,6 +108,37 @@ const TicketTable = () => {
       }
     } catch (error) {
       console.error("Error updating ticket:", error);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId) => {
+    const token = localStorage.getItem("token"); // Get token from local storage
+
+    if (window.confirm("Are you sure you want to delete this ticket?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/pengelola/admin/ticket/deleteTicket/${ticketId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          setTickets(tickets.filter((ticket) => ticket.id !== ticketId)); // Remove ticket from state
+          console.log("Ticket deleted successfully");
+        } else {
+          const data = await response.json();
+          console.error(
+            "Failed to delete ticket:",
+            data.message || response.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Error deleting ticket:", error);
+      }
     }
   };
 
@@ -368,6 +399,12 @@ const TicketTable = () => {
                     >
                       Edit
                     </button>
+                    <button
+                      onClick={() => handleDeleteTicket(ticket.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg ml-2 hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
@@ -487,4 +524,4 @@ const TicketTable = () => {
   );
 };
 
-export default TicketTable;
+export default TicketAdmin;

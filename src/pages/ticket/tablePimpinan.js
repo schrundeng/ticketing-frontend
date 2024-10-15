@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-const TicketTable = () => {
+const TicketPimpinan = () => {
   const [tickets, setTickets] = useState([]); // Initialize with an empty array
-  const [open, setOpen] = useState(false);
-  const [editingTicket, setEditingTicket] = useState(null);
   const [filter, setFilter] = useState("All"); // Filter state
   const [searchQuery, setSearchQuery] = useState(""); // Search state
   const [startDate, setStartDate] = useState(""); // Start date state
@@ -50,66 +48,6 @@ const TicketTable = () => {
 
     fetchTickets();
   }, []); // Empty dependency array to run once on mount
-
-  const handleOpen = (ticket) => {
-    setEditingTicket(ticket);
-    setOpen(true);
-  };
-
-  const handleClose = () => setOpen(false);
-
-  const handleSaveTicket = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-
-    const token = localStorage.getItem("token"); // Get token from local storage
-    const ticketId = editingTicket.id; // Get the ticket ID
-    const statusUrlMap = {
-      Pending: `http://localhost:8000/api/pengelola/ticket/assignTicket/${ticketId}`,
-      "In Progress": `http://localhost:8000/api/pengelola/ticket/startTicket/${ticketId}`,
-      Resolved: `http://localhost:8000/api/pengelola/ticket/completeTicket/${ticketId}`,
-    };
-
-    const apiUrl = statusUrlMap[editingTicket.status]; // Get the correct URL based on status
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ticket_note: editingTicket.ticket_note }), // Send updated ticket_note
-      });
-
-      // Check if response is ok
-      if (response.ok) {
-        const data = await response.json(); // Parse the JSON response
-        console.log(data.message); // Log the success message (if any)
-
-        // Update tickets state
-        setTickets(
-          tickets.map((ticket) =>
-            ticket.id === editingTicket.id
-              ? {
-                  ...ticket,
-                  status: editingTicket.status,
-                  ticket_note: editingTicket.ticket_note,
-                }
-              : ticket
-          )
-        );
-        handleClose(); // Close the modal after saving
-      } else {
-        const data = await response.json(); // Parse the error response
-        console.error(
-          "Failed to update ticket:",
-          data.message || response.statusText
-        );
-      }
-    } catch (error) {
-      console.error("Error updating ticket:", error);
-    }
-  };
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -335,18 +273,16 @@ const TicketTable = () => {
                     : "-"}
                 </span>
               </th>
-              <th className="p-3 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedTickets.length > 0 ? (
-              paginatedTickets.map((ticket) => (
-                <tr key={ticket.id} className="border-b hover:bg-gray-100">
-                  <td className="p-3">{ticket.id}</td>
-                  <td className="p-3">{ticket.user}</td>
-                  <td className="p-3">{ticket.issue}</td>
-                  <td className="p-3">{ticket.date}</td>
-                  <td className="p-3">
+            {paginatedTickets.map((ticket) => (
+              <tr key={ticket.id} className="border-b hover:bg-gray-100">
+                <td className="p-3">{ticket.id}</td>
+                <td className="p-3">{ticket.user}</td>
+                <td className="p-3">{ticket.issue}</td>
+                <td className="p-3">{ticket.date}</td>
+                <td className="p-3">
                     <span
                       className={`inline-block px-3 py-1 rounded-full font-bold ${
                         ticket.status === "Pending"
@@ -361,130 +297,42 @@ const TicketTable = () => {
                       {ticket.status}
                     </span>
                   </td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleOpen(ticket)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center p-3">
-                  No tickets found.
-                </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
 
         {/* Pagination Controls */}
-        <div className="flex justify-between items-center mt-4">
+        <div className="mt-4 flex justify-between items-center">
           <div>
-            <label htmlFor="maxRows" className="mr-2">
-              Rows per page:
-            </label>
-            <select
-              id="maxRows"
-              value={maxRows}
-              onChange={handleMaxRowsChange}
-              className="border rounded-md p-2"
-            >
+            <label className="mr-2">Rows per page:</label>
+            <select value={maxRows} onChange={handleMaxRowsChange} className="border rounded-md p-2">
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={15}>15</option>
             </select>
           </div>
-
           <div>
             <button
-              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50"
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 disabled:opacity-50"
             >
               Previous
             </button>
-            <span className="mx-2">
-              Page {currentPage} of {totalPages}
-            </span>
+            <span className="mx-4">Page {currentPage} of {totalPages}</span>
             <button
-              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50"
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 disabled:opacity-50"
             >
               Next
             </button>
           </div>
         </div>
-
-        {/* Modal for Editing Ticket */}
-        {open && (
-          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="modal-content bg-white p-6 rounded-lg shadow-lg w-1/4">
-              <h2 className="text-xl font-bold mb-4">Edit Ticket</h2>
-              <form onSubmit={handleSaveTicket}>
-                <div className="mb-4">
-                  <label className="block font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={editingTicket.status}
-                    onChange={(e) =>
-                      setEditingTicket({
-                        ...editingTicket,
-                        status: e.target.value,
-                      })
-                    }
-                    className="border rounded-md p-2 w-full"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block font-medium text-gray-700 mb-2">
-                    Solution
-                  </label>
-                  <input
-                    type="text"
-                    name="ticket_note"
-                    value={editingTicket.ticket_note}
-                    onChange={(e) =>
-                      setEditingTicket({
-                        ...editingTicket,
-                        ticket_note: e.target.value,
-                      })
-                    }
-                    className="border rounded-md p-2 w-full"
-                  />
-                </div>
-                <div className="flex justify-between mt-4">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="bg-gray-300 px-4 py-2 rounded-md"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-export default TicketTable;
+export default TicketPimpinan;

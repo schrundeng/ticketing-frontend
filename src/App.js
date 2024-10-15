@@ -11,12 +11,14 @@ import CombinedNavbarSidebarOperator from "./pages/dashboard/navbarPengelola.js"
 import Message from "./pages/message.js";
 import TicketStatus from "./pages/user/ticketStatus.js";
 import CombinedNavbarSidebarPimpinan from "./pages/dashboard/navbarPimpinan.js";
+import TicketPimpinan from "./pages/ticket/tablePimpinan.js";
+import TicketAdmin from "./pages/ticket/tableAdmin.js";
 import PrivateRoute from "./pages/components/PrivateRoute.js";
 import { useState } from "react";
 import NavbarUser from "./pages/user/navbarUser.js";
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility 
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility
 
   return (
     <Router>
@@ -77,6 +79,33 @@ function App() {
         />
 
         <Route
+          path="/ticketadmin"
+          element={
+            <PrivateRoute>
+              <div className="flex h-screen">
+                <CombinedNavbarSidebar
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                />
+                <div
+                  className={`flex flex-col flex-1 transition-all duration-300 ${
+                    sidebarOpen ? "ml-72" : "ml-0"
+                  }`}
+                  style={{
+                    marginTop: "4rem",
+                    width: sidebarOpen ? "calc(100% - 18rem)" : "100%",
+                  }} // Adjust width
+                >
+                  <div className="w-full p-3 overflow-x-auto">
+                    <TicketAdmin />
+                  </div>
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/ticket"
           element={
             <PrivateRoute>
@@ -122,11 +151,11 @@ function App() {
           element={
             <PrivateRoute>
               <NavbarUser />
-                <div className="flex h-screen justify-center items-center w-full">
-                  <div className="flex flex-col flex-1 max-w-full">
-                    <ChatPage />
-                  </div>
+              <div className="flex h-screen justify-center items-center w-full">
+                <div className="flex flex-col flex-1 max-w-full">
+                  <ChatPage />
                 </div>
+              </div>
             </PrivateRoute>
           }
         />
@@ -136,11 +165,11 @@ function App() {
           element={
             <PrivateRoute>
               <NavbarUser />
-                <div className="flex h-screen justify-center items-center w-full">
-                  <div className="flex flex-col flex-1 max-w-full">
-                    <TicketStatus />
-                  </div>
+              <div className="flex h-screen justify-center items-center w-full">
+                <div className="flex flex-col flex-1 max-w-full">
+                  <TicketStatus />
                 </div>
+              </div>
             </PrivateRoute>
           }
         />
@@ -242,7 +271,7 @@ function App() {
                   }} // Adjust width
                 >
                   <div className="w-full p-3 overflow-x-auto">
-                    <TicketTable />
+                    <TicketPimpinan />
                   </div>
                 </div>
               </div>

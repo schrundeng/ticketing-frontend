@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faEnvelope,
   faSignOutAlt,
   faChevronDown,
   faTicketAlt,
@@ -15,13 +16,14 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const navigate = useNavigate();  
+  const [userProfile, setUserProfile] = useState(null); // State for user profile
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const userProfile = {
-    name: "Dr. Tirta",
+  const dummyProfile = {
+    name: "John Doe",
     role: "Pimpinan",
-    image: "https://preview.redd.it/r21hij26xbic1.png?width=421&format=png&auto=webp&s=76f3b4801830c419cd3427f47e2d9a57c74461be",
+    image: "https://scontent.fsub8-1.fna.fbcdn.net/v/t39.30808-1/450918471_1611791953003677_1362261108658263955_n.jpg?stp=dst-jpg_s200x200&_nc_cat=100&ccb=1-7&_nc_sid=50d2ac&_nc_eui2=AeGIN5bV-gI9x-wd2_o-bQKElFqQ7BrYiXiUWpDsGtiJeGVwV-c93Uzf-zfhRTEQVVahNETguPT7RLloyoQge2cM&_nc_ohc=eUiAucgd5jgQ7kNvgEonnQu&_nc_zt=24&_nc_ht=scontent.fsub8-1.fna&_nc_gid=AEM3N45WK8-008nR9IetiMZ&oh=00_AYAOATfHoa00UpK2_ARfnzE2dtl93lBRe0b3ubnCCN3pFA&oe=6713AFB3", // Update to actual image URL
   };
 
   const toggleDropdown = () => {
@@ -32,6 +34,7 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("token");
+
       await axios.patch(
         "http://localhost:8000/api/pengelola/logout",
         {},
@@ -41,6 +44,7 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
           },
         }
       );
+
       localStorage.removeItem("token");
       navigate("/");
     } catch (error) {
@@ -48,8 +52,36 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
     }
   };
 
-  // Check window width to set default sidebar state
+  // Function to fetch user profile
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      if (!userId) {
+        console.error("No user ID found in local storage.");
+        navigate("/");
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setUserProfile(response.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setUserProfile(dummyProfile); // Use dummy profile on error
+    }
+  };
+
   useEffect(() => {
+    fetchUserProfile(); // Fetch user profile when component mounts
+
     const handleResize = () => {
       if (window.innerWidth < 728) {
         setSidebarOpen(false);
@@ -59,7 +91,6 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
     };
 
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -81,7 +112,6 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
         style={{ backgroundColor: "#FFA300", zIndex: 40 }}
         className="fixed top-0 left-0 right-0 flex items-center justify-between p-4 shadow-md"
       >
-        {/* Toggle Button for Sidebar */}
         <button
           className="text-white focus:outline-none hover:bg-opacity-75 p-2 rounded"
           onClick={() => setSidebarOpen((prev) => !prev)}
@@ -91,17 +121,23 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Icons */}
+          {/* Envelope Icon - Redirect to Message Page */}
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => navigate("/message")}
+          >
+            <FontAwesomeIcon icon={faEnvelope} />
+          </button>
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">{userProfile.name}</p>
-                <p className="text-sm text-right">{userProfile.role}</p>
+                <p className="font-semibold">{userProfile ? userProfile.name : dummyProfile.name}</p>
+                <p className="text-sm text-right">{userProfile ? userProfile.role : dummyProfile.role}</p>
               </div>
               <img
-                src={userProfile.image}
+                src={userProfile?.image || dummyProfile.image}
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
                 onClick={openProfileModal}
@@ -143,10 +179,9 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-white"
-          onClick={() => setSidebarOpen(false)} // Close the sidebar
+          onClick={() => setSidebarOpen(false)}
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
@@ -167,11 +202,15 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
                 : ""
             }`}
           >
-            <FontAwesomeIcon icon={faTachometerAlt} size="lg" />
+            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
+              <FontAwesomeIcon icon={faTachometerAlt} size="lg" />
+            </button>
             <Link
               to="/dashboardpimpinan"
               className={`ml-3 ${
-                location.pathname === "/dashboardpimpinan" ? "font-semibold" : ""
+                location.pathname === "/dashboardpimpinan"
+                  ? "font-semibold"
+                  : ""
               }`}
             >
               Dashboard
@@ -184,12 +223,12 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
                 : ""
             }`}
           >
-            <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
+              <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+            </button>
             <Link
               to="/ticketpimpinan"
-              className={`ml-3 ${
-                location.pathname === "/ticketpimpinan" ? "font-semibold" : ""
-              }`}
+              className={`ml-3 ${location.pathname === "/ticketpimpinan" ? "font-semibold" : ""}`}
             >
               Ticket
             </Link>
@@ -201,14 +240,16 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
       <Dialog open={profileModalOpen} onClose={closeProfileModal}>
         <DialogTitle>User Profile</DialogTitle>
         <DialogContent>
-          <div className="flex flex-col items-center">
+          <div className="flex items-center">
             <img
-              src={userProfile.image}
-              alt="Profile"
-              className="w-64 h-64 rounded-full object-cover mb-4"
+              src={userProfile?.image || dummyProfile.image}
+              alt="User"
+              className="w-32 h-32 rounded-full object-cover mr-4"
             />
-            <p className="font-semibold text-lg">{userProfile.name}</p>
-            <p className="text-sm">{userProfile.role}</p>
+            <div>
+              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
+              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+            </div>
           </div>
         </DialogContent>
         <DialogActions>
