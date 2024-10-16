@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
 const Message = () => {
   const [users, setUsers] = useState([]); // State for storing users
@@ -11,19 +12,19 @@ const Message = () => {
   const operatorProfileImg =
     "https://i.pinimg.com/736x/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg"; // Operator's profile image
 
-  // Function to fetch user data
+  // Function to fetch user data using axios
   const fetchUserData = async () => {
     const token = localStorage.getItem("token"); // Get the token from local storage
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/chat/pengelola/get-user-data",
+      const response = await axios.get(
+        "http://localhost:8000/api/chat/pengelola/get-data-user",
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      const data = await response.json();
+      const data = response.data;
       if (data.message === "User data retrieved successfully") {
         setUsers(data.data); // Store the user data
         setSelectedUser(data.data[0]); // Select the first user by default
@@ -33,31 +34,29 @@ const Message = () => {
     }
   };
 
-  // Function to fetch messages for the selected user
+  // Function to fetch messages for the selected user using axios
   const fetchMessages = async (userId) => {
-    const token = localStorage.getItem("token"); // Get the token from local storage
-    const formData = new FormData(); // Create FormData object
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
     formData.append("to_id_user", userId); // Append the user ID to FormData
 
     try {
-      const response = await fetch(
+      const response = await axios.post(
         "http://localhost:8000/api/chat/pengelola/get-message",
+        formData,
         {
-          method: "POST", // Change to POST request
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          body: formData, // Send FormData as the body
         }
       );
-
-      const data = await response.json();
+      const data = response.data;
       if (data.message === "Messages retrieved successfully") {
         const formattedMessages = data.data.map((msg) => ({
           text: msg.message,
-          sender: msg.from_name, // Use from_name for the sender's name
+          sender: msg.from_name,
         }));
-        setMessages(formattedMessages); // Store the formatted messages
+        setMessages(formattedMessages);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -72,7 +71,8 @@ const Message = () => {
   // Fetch messages when a new user is selected
   useEffect(() => {
     if (selectedUser) {
-      fetchMessages(selectedUser.id_user); // Fetch messages for the selected user
+      console.log("Selected user:", selectedUser);
+      fetchMessages(selectedUser.username); // Fetch messages using username
     }
   }, [selectedUser]);
 
@@ -108,15 +108,18 @@ const Message = () => {
         <ul>
           {users.map((user) => (
             <li
-              key={user.id_user}
-              onClick={() => setSelectedUser(user)}
+              key={user.username} // Change key to use username
+              onClick={() => {
+                console.log("User clicked:", user); // Log user click
+                setSelectedUser(user); // Set selected user
+              }}
               className={`cursor-pointer p-3 rounded-lg mb-2 transition-colors duration-300 ${
-                selectedUser && selectedUser.id_user === user.id_user
+                selectedUser && selectedUser.username === user.username
                   ? "bg-gray-700"
                   : "bg-gray-900 hover:bg-gray-700"
               }`}
             >
-              {user.name} {/* Update to display user name */}
+              {user.name}
             </li>
           ))}
         </ul>

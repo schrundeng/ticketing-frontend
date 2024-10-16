@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { SnackbarProvider } from "./pages/components/SnackbarContext.js";
 import SignIn from "./pages/login.js";
 import CombinedNavbarSidebar from "./pages/dashboard/navbarAdmin.js";
 import Dashboard from "./pages/dashboard/dashboardAdmin.js";
@@ -16,11 +17,14 @@ import TicketAdmin from "./pages/ticket/tableAdmin.js";
 import PrivateRoute from "./pages/components/PrivateRoute.js";
 import { useState } from "react";
 import NavbarUser from "./pages/user/navbarUser.js";
+import TicketHistory from "./pages/user/ticketHistory.js";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to control its visibility
 
   return (
+    <SnackbarProvider>
+      {" "}
     <Router>
       <Routes>
         <Route path="/" element={<SignIn />} />
@@ -175,6 +179,20 @@ function App() {
         />
 
         <Route
+          path="/tickethistory"
+          element={
+            <PrivateRoute>
+              <NavbarUser />
+              <div className="flex h-screen justify-center items-center w-full">
+                <div className="flex flex-col flex-1 max-w-full">
+                  <TicketHistory />
+                </div>
+              </div>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/dashboardpengelola"
           element={
             <PrivateRoute>
@@ -280,6 +298,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </SnackbarProvider>
   );
 }
 

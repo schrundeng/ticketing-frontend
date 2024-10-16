@@ -121,13 +121,6 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Envelope Icon - Redirect to Message Page */}
-          <button
-            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={() => navigate("/message")}
-          >
-            <FontAwesomeIcon icon={faEnvelope} />
-          </button>
 
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">

@@ -9,10 +9,18 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [userData, setUserData] = useState(null); // State to store user data
+  const [userData, setUserData] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // State for snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Message for snackbar
   const navigate = useNavigate();
 
   // Fetch user data on component mount
@@ -22,13 +30,12 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         const token = localStorage.getItem("token");
         const response = await axios.get("http://localhost:8000/api/user", {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
-        setUserData(response.data); // Set user data from the response
+        setUserData(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        // Handle error or redirect to login if the token is invalid
         navigate("/");
       }
     };
@@ -50,7 +57,7 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Pass the token in the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -58,23 +65,36 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
       // Remove the token from localStorage after successful logout
       localStorage.removeItem("token");
 
-      // Redirect to the login page
-      navigate("/");
+      // Set snackbar message and open it
+      setSnackbarMessage("Logged out successfully!");
+      setSnackbarOpen(true);
+
+      // Redirect to the login page after a short delay
+      setTimeout(() => {
+        navigate("/");
+      }, 2000); // Adjust the duration as needed
     } catch (error) {
       console.error("Logout failed:", error);
-      // Handle the error, maybe show a message to the user
     }
   };
 
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   const goToChat = () => {
-    navigate("/chat"); // Navigate to chat page
+    navigate("/chat");
   };
   const goToStatus = () => {
-    navigate("/ticketstatus"); // Navigate to chat page
+    navigate("/ticketstatus");
   };
   const goToForm = () => {
-    navigate("/form"); // Navigate to chat page
+    navigate("/form");
   };
+
   return (
     <div>
       {/* Navbar */}
@@ -85,7 +105,7 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center space-x- px-2">
           <button
             className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={goToChat} // Call goToChat on click
+            onClick={goToChat}
           >
             <FontAwesomeIcon icon={faComment} />
           </button>
@@ -93,7 +113,7 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center space-x- px-2">
           <button
             className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={goToStatus} // Call goToChat on click
+            onClick={goToStatus}
           >
             <FontAwesomeIcon icon={faTicket} />
           </button>
@@ -101,25 +121,22 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex items-center space-x- px-2">
           <button
             className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={goToForm} // Call goToChat on click
+            onClick={goToForm}
           >
             <FontAwesomeIcon icon={faPenToSquare} />
           </button>
         </div>
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-          {/* Icons */}
-
           {/* User Profile */}
           <div className="flex items-center relative dropdown-container">
             <div className="flex items-center">
               <div className="ml-5 mr-2 text-black-600">
-                {/* Display real user data */}
                 <p className="font-semibold">
-                  {userData ? userData.name : "Loading..."} {/* User name */}
+                  {userData ? userData.name : "Loading..."}
                 </p>
                 <p className="text-sm text-right">
-                  {userData ? userData.id_user : ""} {/* User ID */}
+                  {userData ? userData.id_user : ""}
                 </p>
               </div>
               <img
@@ -156,6 +173,18 @@ const NavbarUser = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
         </div>
       </div>
+
+      {/* Snackbar for logout message */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

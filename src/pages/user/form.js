@@ -8,6 +8,7 @@ import Select from "@mui/material/Select"; // Import Select
 import InputLabel from "@mui/material/InputLabel"; // Import InputLabel
 import FormControl from "@mui/material/FormControl"; // Import FormControl
 import FormHelperText from "@mui/material/FormHelperText"; // Import FormHelperText for error messages
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -23,7 +24,10 @@ const Form = () => {
   const [deskripsiError, setDeskripsiError] = useState(false); // State for Deskripsi error
   const [categoryError, setCategoryError] = useState(false); // State for Category error
 
+  const navigate = useNavigate(); // Initialize useNavigate
+
   useEffect(() => {
+    // Fetch categories on component mount
     const fetchCategories = async () => {
       const token = localStorage.getItem("token");
 
@@ -92,16 +96,20 @@ const Form = () => {
 
         localStorage.setItem("ticket_id", ticketId);
 
-        localStorage.setItem(
-          "snackbarMessage",
+        // Set snackbar message and open it
+        setSnackbarMessage(
           `Ticket created successfully! Your Ticket ID is: ${ticketId}`
         );
+        setSnackbarOpen(true);
 
         setDeskripsi("");
         setCategory("");
         setError("");
 
-        window.location.href = "/ticketstatus";
+        // Navigate to the ticket status page after a short delay
+        setTimeout(() => {
+          navigate("/ticketstatus");
+        }, 2000); // Change the duration as needed
       }
     } catch (error) {
       console.error("Error reporting issue:", error);

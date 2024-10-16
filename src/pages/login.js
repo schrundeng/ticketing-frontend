@@ -49,20 +49,22 @@ export default function SignInSide() {
     const data = new FormData(event.currentTarget);
     const id = data.get("id");
     const password = data.get("password");
-  
+
     if (id && password) {
       setLoading(true);
       try {
         let apiUrl = "";
         let requestBody = {};
-  
+
         if (id.length === 12) {
+          // Login as a user
           apiUrl = "http://localhost:8000/api/loginUser";
           requestBody = {
             id_user: id,
             password: password,
           };
         } else if (id.length === 18) {
+          // Login as a pengelola
           apiUrl = "http://localhost:8000/api/loginPengelola";
           requestBody = {
             id_pengelola: id,
@@ -73,33 +75,37 @@ export default function SignInSide() {
           setLoading(false);
           return;
         }
-  
+
         const response = await axios.post(apiUrl, requestBody);
-  
+
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
-          localStorage.setItem("userId", id); // Store user ID in local storage
-  
-          // Get user role
-          const token = localStorage.getItem("token");
-          const roleResponse = await axios.get(
-            `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-  
-          const role = roleResponse.data.role;
-          switch (role) {
-            case "operator":
-              navigate("/dashboardpengelola");
-              break;
-            case "pemimpin":
-              navigate("/dashboardpimpinan");
-              break;
-            case "admin":
-              navigate("/dashboard");
-              break;
-            default:
-              setError("Unknown role.");
+
+          if (id.length === 12) {
+            // For a user, navigate to /form directly
+            navigate("/form");
+          } else {
+            // For a pengelola, fetch role and navigate accordingly
+            const token = localStorage.getItem("token");
+            const roleResponse = await axios.get(
+              `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            const role = roleResponse.data.role;
+            switch (role) {
+              case "operator":
+                navigate("/dashboardpengelola");
+                break;
+              case "pemimpin":
+                navigate("/dashboardpimpinan");
+                break;
+              case "admin":
+                navigate("/dashboard");
+                break;
+              default:
+                setError("Unknown role.");
+            }
           }
         } else {
           setError("Login failed. Please check your credentials.");
@@ -117,7 +123,7 @@ export default function SignInSide() {
     } else {
       setError("Please fill out both ID and password fields.");
     }
-  };  
+  };
 
   return (
     <ThemeProvider theme={defaultTheme}>

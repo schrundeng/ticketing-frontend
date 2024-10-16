@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import NavbarUser from "./navbarUser.js";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperclip, faChevronDown } from "@fortawesome/free-solid-svg-icons";
@@ -51,10 +50,10 @@ const ChatPage = () => {
 
     const formData = new FormData();
     if (message) {
-      formData.append("message", message);
+      formData.append("message", message); // Keep as "message"
     }
     if (file) {
-      formData.append("file", file);
+      formData.append("file", file); // Keep as "file"
     }
     formData.append("to_id_pengelola", toId);
 
@@ -76,6 +75,7 @@ const ChatPage = () => {
         setFile(null);
         setError("");
 
+        // Fetch messages again to update the chat
         const fetchMessages = async () => {
           const res = await axios.post(
             "http://localhost:8000/api/chat/user/get-message",
@@ -134,7 +134,11 @@ const ChatPage = () => {
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        <div className="h-80 overflow-y-auto mb-4" onScroll={handleScroll}>
+        <div
+          className="overflow-y-auto mb-4"
+          onScroll={handleScroll}
+          style={{ height: "50vh" }}
+        >
           {Array.isArray(messages) && messages.length > 0 ? (
             messages.map((msg, index) => {
               const senderType = determineSender(msg.from_id_user);

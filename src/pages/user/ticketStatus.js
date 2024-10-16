@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import NavbarUser from "./navbarUser.js";
 import axios from "axios";
-import { Alert } from "@mui/material";
+import { Alert, Skeleton } from "@mui/material"; // Import Skeleton
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons"; // Import the clock-rotate-left icon
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const TicketStatus = () => {
   const [ticket, setTicket] = useState(null);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Initialize navigate
 
   // Fetch ticket data and categories on component mount
   useEffect(() => {
@@ -79,13 +83,13 @@ const TicketStatus = () => {
             <i className="fas fa-hourglass-start"></i> Not Yet Handled
           </span>
         );
-      case 1: // Assuming 1 means "pending"
+      case 1: // Assuming 1 means "finished"
         return (
           <span className="text-green-500">
             <i className="fas fa-check-circle"></i> Finished
           </span>
         );
-      case 2: // Assuming 2 means "finished"
+      case 2: // Assuming 2 means "pending"
         return (
           <span className="text-yellow-500">
             <i className="fas fa-spinner"></i> Pending
@@ -112,17 +116,45 @@ const TicketStatus = () => {
       ></div>
       {/* Ticket Status Content */}
       <div className="relative bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full sm:w-4/5 md:w-3/4 lg:w-1/2 xl:w-1/3 bg-opacity-80 mx-4 sm:mx-6 md:mx-8 backdrop-blur-md">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Ticket Status
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Ticket Status
+          </h2>
+          <button
+            className="bg-gray-100 text-gray-600 h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => navigate("/tickethistory")}
+          >
+            <FontAwesomeIcon icon={faClockRotateLeft} />{" "}
+            {/* Clock rotate left icon */}
+          </button>
+        </div>
 
         {loading ? (
-          <div>Loading ticket details...</div>
+          <div
+            className="p-4 bg-white shadow-sm rounded-md"
+            style={{ height: "50vh", overflowY: "auto" }}
+          >
+            {/* Skeleton Loader for Ticket Details */}
+            <Skeleton variant="text" width="15%" height={40} />
+            <Skeleton variant="text" width="80%" height={40} />
+            <Skeleton variant="text" width="15%" height={40} />
+            <Skeleton variant="text" width="60%" height={40} />
+            <Skeleton variant="text" width="15%" height={40} />
+            <Skeleton variant="text" width="70%" height={40} />
+            <Skeleton variant="text" width="15%" height={40} />
+            <Skeleton variant="text" width="50%" height={40} />
+            <Skeleton variant="text" width="18%" height={40} />
+            <Skeleton variant="text" width="55%" height={40} />
+            
+          </div>
         ) : error ? (
           <div className="text-red-500 mb-4">{error}</div>
         ) : (
           ticket && (
-            <div>
+            <div
+              className="p-4 bg-white shadow-sm rounded-md"
+              style={{ height: "50vh", overflowY: "auto" }}
+            >
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Ticket ID:
