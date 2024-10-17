@@ -32,13 +32,24 @@ const TicketPimpinan = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          const fetchedTickets = data.ticket.map((ticket) => ({
-            id: ticket.id_ticket,
-            date: ticket.date_created.split(" ")[0],
-            user: ticket.id_user,
-            issue: ticket.description,
-            status: ticket.status_note,
-          }));
+          const fetchedTickets = data.ticket.map((ticket) => {
+            // Parse the date and format it
+            const date = new Date(ticket.updated_at);
+            const formattedDate = `${date
+              .getDate()
+              .toString()
+              .padStart(2, "0")}/${(date.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}/${date.getFullYear()}`;
+
+            return {
+              id: ticket.id_ticket,
+              date: formattedDate, // Use the formatted date here
+              user: ticket.id_user,
+              issue: ticket.description,
+              status: ticket.status_note,
+            };
+          });
           setTickets(fetchedTickets);
         } else {
           console.error("Failed to fetch tickets:", data.message);
@@ -51,7 +62,7 @@ const TicketPimpinan = () => {
     };
 
     fetchTickets();
-  }, []);
+  }, []); // Ensure you call fetchTickets when the component mounts
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -124,7 +135,8 @@ const TicketPimpinan = () => {
     })
     .sort((a, b) => {
       const getValue = (ticket, column) => {
-        if (column === "date") return new Date(ticket.date);
+        if (column === "date")
+          return new Date(ticket.date.split("/").reverse().join("-")); // Convert formatted date to Date object
         if (column === "user" || column === "issue")
           return ticket[column].toLowerCase();
         return ticket[column];
@@ -227,72 +239,72 @@ const TicketPimpinan = () => {
             <CircularProgress />
           </div>
         ) : (
-        <table className="table-auto min-w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-gray-700 border-b">
-              <th className="p-3 text-left">ID</th>
-              <th
-                className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("user")}
-              >
-                User{" "}
-                <span>
-                  {sortColumn === "user"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : "-"}
-                </span>
-              </th>
-              <th
-                className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("issue")}
-              >
-                Issue{" "}
-                <span>
-                  {sortColumn === "issue"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : "-"}
-                </span>
-              </th>
-              <th
-                className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("date")}
-              >
-                Date{" "}
-                <span>
-                  {sortColumn === "date"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : "-"}
-                </span>
-              </th>
-              <th
-                className="p-3 text-left cursor-pointer"
-                onClick={() => toggleSortOrder("status")}
-              >
-                Status{" "}
-                <span>
-                  {sortColumn === "status"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : "-"}
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedTickets.map((ticket) => (
-              <tr key={ticket.id} className="border-b hover:bg-gray-100">
-                <td className="p-3">{ticket.id}</td>
-                <td className="p-3">{ticket.user}</td>
-                <td className="p-3">{ticket.issue}</td>
-                <td className="p-3">{ticket.date}</td>
-                <td className="p-3">
+          <table className="table-auto min-w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-200 text-gray-700 border-b">
+                <th className="p-3 text-left">ID</th>
+                <th
+                  className="p-3 text-left cursor-pointer"
+                  onClick={() => toggleSortOrder("user")}
+                >
+                  User{" "}
+                  <span>
+                    {sortColumn === "user"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : "-"}
+                  </span>
+                </th>
+                <th
+                  className="p-3 text-left cursor-pointer"
+                  onClick={() => toggleSortOrder("issue")}
+                >
+                  Issue{" "}
+                  <span>
+                    {sortColumn === "issue"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : "-"}
+                  </span>
+                </th>
+                <th
+                  className="p-3 text-left cursor-pointer"
+                  onClick={() => toggleSortOrder("date")}
+                >
+                  Date{" "}
+                  <span>
+                    {sortColumn === "date"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : "-"}
+                  </span>
+                </th>
+                <th
+                  className="p-3 text-left cursor-pointer"
+                  onClick={() => toggleSortOrder("status")}
+                >
+                  Status{" "}
+                  <span>
+                    {sortColumn === "status"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : "-"}
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedTickets.map((ticket) => (
+                <tr key={ticket.id} className="border-b hover:bg-gray-100">
+                  <td className="p-3">{ticket.id}</td>
+                  <td className="p-3">{ticket.user}</td>
+                  <td className="p-3">{ticket.issue}</td>
+                  <td className="p-3">{ticket.date}</td>
+                  <td className="p-3">
                     <span
                       className={`inline-block px-3 py-1 rounded-full font-bold ${
                         ticket.status === "Pending"
@@ -307,17 +319,21 @@ const TicketPimpinan = () => {
                       {ticket.status}
                     </span>
                   </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
 
         {/* Pagination Controls */}
         <div className="mt-4 flex justify-between items-center">
           <div>
             <label className="mr-2">Rows per page:</label>
-            <select value={maxRows} onChange={handleMaxRowsChange} className="border rounded-md p-2">
+            <select
+              value={maxRows}
+              onChange={handleMaxRowsChange}
+              className="border rounded-md p-2"
+            >
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={15}>15</option>
@@ -331,7 +347,9 @@ const TicketPimpinan = () => {
             >
               Previous
             </button>
-            <span className="mx-4">Page {currentPage} of {totalPages}</span>
+            <span className="mx-4">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               disabled={currentPage === totalPages}
               onClick={() => handlePageChange(currentPage + 1)}

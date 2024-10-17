@@ -41,6 +41,8 @@ const Message = () => {
     formData.append("to_id_user", userId); // Append the user ID to FormData
 
     try {
+      console.log("Fetching messages for userId:", userId); // Debugging the user ID
+
       const response = await axios.post(
         "http://localhost:8000/api/chat/pengelola/get-message",
         formData,
@@ -50,23 +52,35 @@ const Message = () => {
           },
         }
       );
+
+      console.log("API Response:", response.data); // Log the entire response
+
       const data = response.data;
+
+      // Check if the response message indicates success
       if (data.message === "Messages retrieved successfully") {
+        console.log("Messages retrieved:", data.data); // Log the raw message data
+
+        // Format the messages for rendering
         const formattedMessages = data.data.map((msg) => ({
-          text: msg.message,
-          sender: msg.from_name,
+          text: msg.message, // The actual chat message
+          sender:
+            msg.from_name === selectedUser.name
+              ? selectedUser.name
+              : "Operator", // Sender info
+          createdAt: msg.created_at, // Timestamp (optional)
         }));
-        setMessages(formattedMessages);
+
+        console.log("Formatted messages:", formattedMessages); // Log formatted messages
+
+        setMessages(formattedMessages); // Update the state with chat messages
+      } else {
+        console.error("Unexpected message:", data.message);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   };
-
-  // Fetch user data on component mount
-  useEffect(() => {
-    fetchUserData();
-  }, []);
 
   // Fetch messages when a new user is selected
   useEffect(() => {
@@ -84,21 +98,52 @@ const Message = () => {
   }, [messages]);
 
   // Handle sending a new message
-  const sendMessage = (e) => {
-    e.preventDefault();
+  const sendMessage = async (e) => {
+    e.preventDefault(); // Prevent default form submission
     if (newMessage.trim()) {
       setLoading(true); // Set loading state to true
-      setTimeout(() => {
-        const updatedMessages = [
-          ...messages,
-          { text: newMessage, sender: "Operator" },
-        ];
-        setMessages(updatedMessages);
-        setNewMessage(""); // Clear input field
+
+      const token = localStorage.getItem("token"); // Get the token
+      const formData = new FormData();
+      formData.append("to_id_user", selectedUser.username); // User ID of the selected user
+      formData.append("message", newMessage); // The message to be sent
+
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/chat/pengelola/send-chat",
+          formData,
+          {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // Handle the API response
+        console.log("Send Message Response:", response.data);
+        if (response.data.message === "Chat sent successfully") {
+          const sentMessage = {
+            text: newMessage,
+            sender: "Operator", // Assuming the operator is sending the message
+          };
+          setMessages((prevMessages) => [...prevMessages, sentMessage]); // Add the sent message to the state
+          setNewMessage(""); // Clear input field
+        } else {
+          console.error("Error sending message:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      } finally {
         setLoading(false); // Reset loading state
-      }, 1000);
+      }
     }
   };
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   return (
     <div className="flex h-[calc(100vh-6rem)] pt-3">
@@ -158,7 +203,7 @@ const Message = () => {
                 {message.sender === "Operator" ? (
                   <>
                     <div className="inline-block max-w-xs px-4 py-2 rounded-xl shadow bg-blue-500 text-white">
-                      <strong>{message.sender}:</strong> {message.message}
+                      <strong>{message.sender}:</strong> {message.text}
                     </div>
                     <img
                       src={operatorProfileImg}
@@ -174,7 +219,7 @@ const Message = () => {
                       className="w-8 h-8 rounded-full mr-2"
                     />
                     <div className="inline-block max-w-xs px-4 py-2 rounded-xl shadow bg-white text-gray-800 border border-gray-300">
-                      <strong>{message.sender}:</strong> {message.message}
+                      <strong>{message.sender}:</strong> {message.text}
                     </div>
                   </>
                 )}
@@ -196,12 +241,12 @@ const Message = () => {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            placeholder="Type a message..."
+            className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring focus:ring-blue-500"
+            placeholder="Type your message..."
           />
           <button
             type="submit"
-            className="bg-blue-500 text-white px-5 py-2 rounded-r-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none"
+            className="bg-blue-500 text-white p-3 rounded-r-lg hover:bg-blue-600"
           >
             Send
           </button>
