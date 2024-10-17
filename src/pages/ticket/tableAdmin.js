@@ -1,4 +1,11 @@
 import React, { useEffect, useState } from "react";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const TicketAdmin = () => {
   const [tickets, setTickets] = useState([]); // Initialize with an empty array
@@ -12,11 +19,15 @@ const TicketAdmin = () => {
   const [sortColumn, setSortColumn] = useState("date"); // State to keep track of the column to sort
   const [maxRows, setMaxRows] = useState(5); // State for maximum rows displayed
   const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [loading, setLoading] = useState(true);
 
-  // Fetch ticket data from the API
   useEffect(() => {
     const fetchTickets = async () => {
-      const token = localStorage.getItem("token"); // Get token from local storage
+      setLoading(true); // Set loading to true before the fetch starts
+      const token = localStorage.getItem("token");
 
       try {
         const response = await fetch(
@@ -31,11 +42,10 @@ const TicketAdmin = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          // Map API data to the ticket structure you need
           const fetchedTickets = data.ticket.map((ticket) => ({
             id: ticket.id_ticket,
-            date: ticket.date_created.split(" ")[0], // Extract date part
-            user: ticket.id_user, // Assuming this is the user name, adjust if needed
+            date: ticket.date_created.split(" ")[0],
+            user: ticket.id_user,
             issue: ticket.description,
             status: ticket.status_note,
           }));
@@ -45,11 +55,13 @@ const TicketAdmin = () => {
         }
       } catch (error) {
         console.error("Error fetching tickets:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetch completes
       }
     };
 
     fetchTickets();
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
   const handleOpen = (ticket) => {
     setEditingTicket(ticket);
@@ -58,18 +70,24 @@ const TicketAdmin = () => {
 
   const handleClose = () => setOpen(false);
 
-  const handleSaveTicket = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
-    const token = localStorage.getItem("token"); // Get token from local storage
-    const ticketId = editingTicket.id; // Get the ticket ID
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleSaveTicket = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    const ticketId = editingTicket.id;
     const statusUrlMap = {
       Pending: `http://localhost:8000/api/pengelola/ticket/assignTicket/${ticketId}`,
       "In Progress": `http://localhost:8000/api/pengelola/ticket/startTicket/${ticketId}`,
       Resolved: `http://localhost:8000/api/pengelola/ticket/completeTicket/${ticketId}`,
     };
-
-    const apiUrl = statusUrlMap[editingTicket.status]; // Get the correct URL based on status
+    const apiUrl = statusUrlMap[editingTicket.status];
 
     try {
       const response = await fetch(apiUrl, {
@@ -78,15 +96,10 @@ const TicketAdmin = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ticket_note: editingTicket.ticket_note }), // Send updated ticket_note
+        body: JSON.stringify({ ticket_note: editingTicket.ticket_note }),
       });
 
-      // Check if response is ok
       if (response.ok) {
-        const data = await response.json(); // Parse the JSON response
-        console.log(data.message); // Log the success message (if any)
-
-        // Update tickets state
         setTickets(
           tickets.map((ticket) =>
             ticket.id === editingTicket.id
@@ -98,22 +111,19 @@ const TicketAdmin = () => {
               : ticket
           )
         );
-        handleClose(); // Close the modal after saving
+        handleClose();
+        showSnackbar("Ticket updated successfully!", "success");
       } else {
-        const data = await response.json(); // Parse the error response
-        console.error(
-          "Failed to update ticket:",
-          data.message || response.statusText
-        );
+        const data = await response.json();
+        showSnackbar(data.message || "Failed to update ticket.", "error");
       }
     } catch (error) {
-      console.error("Error updating ticket:", error);
+      showSnackbar("Error updating ticket.", "error");
     }
   };
 
   const handleDeleteTicket = async (ticketId) => {
-    const token = localStorage.getItem("token"); // Get token from local storage
-
+    const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this ticket?")) {
       try {
         const response = await fetch(
@@ -127,17 +137,14 @@ const TicketAdmin = () => {
         );
 
         if (response.ok) {
-          setTickets(tickets.filter((ticket) => ticket.id !== ticketId)); // Remove ticket from state
-          console.log("Ticket deleted successfully");
+          setTickets(tickets.filter((ticket) => ticket.id !== ticketId));
+          showSnackbar("Ticket deleted successfully!", "success");
         } else {
           const data = await response.json();
-          console.error(
-            "Failed to delete ticket:",
-            data.message || response.statusText
-          );
+          showSnackbar(data.message || "Failed to delete ticket.", "error");
         }
       } catch (error) {
-        console.error("Error deleting ticket:", error);
+        showSnackbar("Error deleting ticket.", "error");
       }
     }
   };
@@ -310,6 +317,12 @@ const TicketAdmin = () => {
         </div>
 
         {/* Ticket Table */}
+        {loading ? (
+          // Show loading spinner while fetching data
+          <div className="flex justify-center items-center">
+            <CircularProgress />
+          </div>
+        ) : (
         <table className="table-auto min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 border-b">
@@ -417,6 +430,7 @@ const TicketAdmin = () => {
             )}
           </tbody>
         </table>
+        )}
 
         {/* Pagination Controls */}
         <div className="flex justify-between items-center mt-4">
@@ -520,6 +534,20 @@ const TicketAdmin = () => {
           </div>
         )}
       </div>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

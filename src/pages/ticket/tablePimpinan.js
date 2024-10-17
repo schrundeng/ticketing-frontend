@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const TicketPimpinan = () => {
   const [tickets, setTickets] = useState([]); // Initialize with an empty array
@@ -10,11 +11,13 @@ const TicketPimpinan = () => {
   const [sortColumn, setSortColumn] = useState("date"); // State to keep track of the column to sort
   const [maxRows, setMaxRows] = useState(5); // State for maximum rows displayed
   const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [loading, setLoading] = useState(true);
 
   // Fetch ticket data from the API
   useEffect(() => {
     const fetchTickets = async () => {
-      const token = localStorage.getItem("token"); // Get token from local storage
+      setLoading(true); // Set loading to true before the fetch starts
+      const token = localStorage.getItem("token");
 
       try {
         const response = await fetch(
@@ -29,11 +32,10 @@ const TicketPimpinan = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          // Map API data to the ticket structure you need
           const fetchedTickets = data.ticket.map((ticket) => ({
             id: ticket.id_ticket,
-            date: ticket.date_created.split(" ")[0], // Extract date part
-            user: ticket.id_user, // Assuming this is the user name, adjust if needed
+            date: ticket.date_created.split(" ")[0],
+            user: ticket.id_user,
             issue: ticket.description,
             status: ticket.status_note,
           }));
@@ -43,11 +45,13 @@ const TicketPimpinan = () => {
         }
       } catch (error) {
         console.error("Error fetching tickets:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetch completes
       }
     };
 
     fetchTickets();
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -217,6 +221,12 @@ const TicketPimpinan = () => {
         </div>
 
         {/* Ticket Table */}
+        {loading ? (
+          // Show loading spinner while fetching data
+          <div className="flex justify-center items-center">
+            <CircularProgress />
+          </div>
+        ) : (
         <table className="table-auto min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 border-b">
@@ -301,6 +311,7 @@ const TicketPimpinan = () => {
             ))}
           </tbody>
         </table>
+        )}
 
         {/* Pagination Controls */}
         <div className="mt-4 flex justify-between items-center">

@@ -1,3 +1,4 @@
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -17,29 +18,38 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Snackbar,
+  Alert as MuiAlert,
 } from "@mui/material";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null); // Update to fetch from API
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Message for snackbar
   const location = useLocation();
   const navigate = useNavigate();
 
   const dummyProfile = {
     name: "Makoto",
     role: "Admin",
-    image: "https://i.pinimg.com/originals/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
+    image:
+      "https://i.pinimg.com/originals/cb/bc/ef/cbbceffe703ba2c8918132599130fdec.jpg",
   };
 
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId"); // Retrieve user ID from local storage
+      const userId = localStorage.getItem("userId");
 
       if (!userId) {
         console.error("No user ID found in local storage.");
-        navigate("/"); // Redirect to login if user ID is not found
+        navigate("/");
         return;
       }
 
@@ -51,11 +61,10 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           },
         }
       );
-      setUserProfile(response.data); // Set the fetched user data
+      setUserProfile(response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
-      setUserProfile(dummyProfile); // Set dummy profile on error
-      // Optionally, navigate to the login page or handle error differently
+      setUserProfile(dummyProfile);
     }
   };
 
@@ -80,9 +89,13 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         }
       );
       localStorage.removeItem("token");
+      setSnackbarMessage("Logged out successfully!");
+      setSnackbarOpen(true);
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
+      setSnackbarMessage("Failed to log out.");
+      setSnackbarOpen(true);
     }
   };
 
@@ -109,6 +122,13 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
     setProfileModalOpen(false);
   };
 
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   return (
     <div>
       {/* Navbar */}
@@ -132,7 +152,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <p className="text-sm text-right">{userProfile.role}</p>
               </div>
               <img
-                src={userProfile?.image || dummyProfile.image} // Fallback image URL
+                src={userProfile?.image || dummyProfile.image}
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover"
                 onClick={openProfileModal}
@@ -179,7 +199,7 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {/* Close Button */}
         <button
           className="absolute top-3 right-3 text-white"
-          onClick={() => setSidebarOpen(false)} // Close the sidebar
+          onClick={() => setSidebarOpen(false)}
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
@@ -258,8 +278,8 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
               className="w-32 h-32 rounded-full object-cover mr-4"
             />
             <div>
-              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
-              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+              <p className="font-semibold text-lg">{userProfile?.name}</p>
+              <p className="text-gray-600">{userProfile?.role}</p>
             </div>
           </div>
         </DialogContent>
@@ -269,6 +289,22 @@ const CombinedNavbarSidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity="success" // Changed to 'success'
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

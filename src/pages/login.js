@@ -80,7 +80,8 @@ export default function SignInSide() {
 
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
-
+          localStorage.setItem("userId", id);
+          
           if (id.length === 12) {
             // For a user, navigate to /form directly
             navigate("/form");
