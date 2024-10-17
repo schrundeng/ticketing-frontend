@@ -2,15 +2,40 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperclip, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
 const ChatPage = () => {
   const [message, setMessage] = useState("");
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
   const [messages, setMessages] = useState([]);
-  const toId = "123456789012345678";
+  const [operators, setOperators] = useState([]);
+  const [selectedOperator, setSelectedOperator] = useState("");
+  const toId = selectedOperator || "123456789012345678"; // Default ID
   const messagesEndRef = useRef(null);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const fetchOperators = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:8000/api/chat/user/get-data-operator",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
+          }
+        );
+        setOperators(response.data.data);
+      } catch (error) {
+        console.error("Error fetching operators:", error);
+      }
+    };
+
+    fetchOperators();
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -29,7 +54,6 @@ const ChatPage = () => {
 
         if (response.status === 200) {
           setMessages(response.data.data);
-          console.log(response.data);
           scrollToBottom();
         }
       } catch (error) {
@@ -38,8 +62,10 @@ const ChatPage = () => {
       }
     };
 
-    fetchMessages();
-  }, []);
+    if (selectedOperator) {
+      fetchMessages();
+    }
+  }, [selectedOperator]);
 
   const handleMessageSend = async (event) => {
     event.preventDefault();
@@ -50,10 +76,10 @@ const ChatPage = () => {
 
     const formData = new FormData();
     if (message) {
-      formData.append("message", message); // Keep as "message"
+      formData.append("message", message);
     }
     if (file) {
-      formData.append("file", file); // Keep as "file"
+      formData.append("file", file);
     }
     formData.append("to_id_pengelola", toId);
 
@@ -75,7 +101,6 @@ const ChatPage = () => {
         setFile(null);
         setError("");
 
-        // Fetch messages again to update the chat
         const fetchMessages = async () => {
           const res = await axios.post(
             "http://localhost:8000/api/chat/user/get-message",
@@ -130,7 +155,34 @@ const ChatPage = () => {
         }}
       ></div>
       <div className="relative bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg w-full sm:w-4/5 md:w-3/4 lg:w-1/2 xl:w-1/3 bg-opacity-80 mx-4 sm:mx-6 md:mx-8 backdrop-blur-md">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Chat</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Chat</h2>
+
+          <FormControl
+            variant="outlined"
+            size="small"
+            style={{ minWidth: 200 }}
+          >
+            <InputLabel id="select-operator-label">Select Operator</InputLabel>
+            <Select
+              labelId="select-operator-label"
+              id="select-operator"
+              value={selectedOperator}
+              onChange={(e) => setSelectedOperator(e.target.value)}
+              label="Select Operator"
+            >
+              {operators &&
+                operators.map((operator) => (
+                  <MenuItem
+                    key={operator.id_pengelola}
+                    value={operator.id_pengelola}
+                  >
+                    {operator.name}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </div>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
