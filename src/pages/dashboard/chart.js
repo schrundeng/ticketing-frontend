@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import ApexCharts from "react-apexcharts";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 
 const PieChart = () => {
@@ -9,6 +10,7 @@ const PieChart = () => {
   const [labels, setLabels] = useState([]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token"); // Assuming you're storing the token here
       const response = await axios.get(
@@ -30,6 +32,8 @@ const PieChart = () => {
       setLabels(ticketCategories);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,10 +102,22 @@ const PieChart = () => {
       },
     },
   };
-
+  const [loading, setLoading] = useState(true);
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg">
-      <ApexCharts options={options} series={series} type="donut" height={350} />
+      {loading ? (
+        // Show loading spinner while fetching data
+        <div className="flex justify-center items-center">
+          <CircularProgress />
+        </div>
+      ) : (
+        <ApexCharts
+          options={options}
+          series={series}
+          type="donut"
+          height={350}
+        />
+      )}
     </div>
   );
 };

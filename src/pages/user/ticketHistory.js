@@ -26,7 +26,7 @@ const TicketHistory = () => {
       try {
         // Fetch tickets
         const ticketsResponse = await axios.get(
-          `http://localhost:8000/api/user/ticket/getTicket`,
+          `http://localhost:8000/api/user/ticket/getTicketbyAuth`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -35,7 +35,7 @@ const TicketHistory = () => {
         );
 
         if (ticketsResponse.status === 200) {
-          setTickets(ticketsResponse.data.ticket);
+          setTickets(ticketsResponse.data.tickets);
         } else {
           setError("Failed to fetch tickets.");
         }

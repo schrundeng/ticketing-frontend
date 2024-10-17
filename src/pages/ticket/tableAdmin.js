@@ -83,9 +83,9 @@ const TicketAdmin = () => {
     const token = localStorage.getItem("token");
     const ticketId = editingTicket.id;
     const statusUrlMap = {
-      Pending: `http://localhost:8000/api/pengelola/ticket/assignTicket/${ticketId}`,
-      "In Progress": `http://localhost:8000/api/pengelola/ticket/startTicket/${ticketId}`,
-      Resolved: `http://localhost:8000/api/pengelola/ticket/completeTicket/${ticketId}`,
+      Pending: `http://localhost:8000/api/pengelola/operator/ticket/assignTicket/${ticketId}`,
+      "In Progress": `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`,
+      Resolved: `http://localhost:8000/api/pengelola/operator/ticket/completeTicket/${ticketId}`,
     };
     const apiUrl = statusUrlMap[editingTicket.status];
 
@@ -408,7 +408,7 @@ const TicketAdmin = () => {
                   <td className="p-3">
                     <button
                       onClick={() => handleOpen(ticket)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2 mb-2 hover:bg-blue-600"
                     >
                       Edit
                     </button>
