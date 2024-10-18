@@ -1,38 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  Button, // Importing Button from MUI
+  Button,
 } from "@mui/material";
+import axios from "axios";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const PengelolaTable = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      username: "john_doe",
-      email: "john@example.com",
-      role: "Operator",
-    },
-    { id: 2, username: "jane_smith", email: "jane@example.com", role: "Admin" },
-    {
-      id: 3,
-      username: "alice_johnson",
-      email: "alice@example.com",
-      role: "Pimpinan",
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [newUser, setNewUser] = useState({ username: "", email: "", role: "" });
+  const [newUser, setNewUser] = useState({
+    username: "",
+    name: "",
+    email: "",
+    role: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortColumn, setSortColumn] = useState("id");
+  const [sortColumn, setSortColumn] = useState("username");
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Retrieve token from local storage
+        const response = await axios.get(
+          "http://localhost:8000/api/pengelola/admin/auth/getDataPengelola",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Set the Authorization header
+            },
+          }
+        );
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const toggleSortOrder = (column) => {
     const isAsc = sortColumn === column && sortOrder === "asc";
@@ -62,30 +84,98 @@ const PengelolaTable = () => {
 
   const handleOpen = (user = null) => {
     setEditingUser(user);
-    setNewUser(user ? user : { username: "", email: "", role: "" });
+    setNewUser(
+      user
+        ? user
+        : {
+            username: "",
+            name: "",
+            email: "",
+            role: "",
+          }
+    );
     setOpen(true);
   };
 
-  const handleSave = () => {
-    if (editingUser) {
-      setUsers(
-        users.map((user) =>
-          user.id === editingUser.id ? { ...user, ...newUser } : user
-        )
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (editingUser) {
+        await axios.patch(
+          `http://localhost:8000/api/pengelola/admin/auth/updatePengelola/${editingUser.id_pengelola}`,
+          newUser,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUsers(
+          users.map((user) =>
+            user.id_pengelola === editingUser.id_pengelola
+              ? { ...user, ...newUser }
+              : user
+          )
+        );
+      } else {
+        const response = await axios.post(
+          "http://localhost:8000/api/pengelola/admin/auth/createPengelola",
+          newUser,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUsers([...users, response.data]);
+      }
+      setNewUser({ username: "", name: "", email: "", role: "" });
+      setEditingUser(null);
+      setOpen(false);
+      setSnackbarMessage(
+        editingUser ? "User updated successfully!" : "User added successfully!"
       );
-    } else {
-      // Generate a new unique ID
-      const newId =
-        users.length > 0 ? Math.max(users.map((user) => user.id)) + 1 : 1;
-      setUsers([...users, { id: newId, ...newUser }]);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Error saving user:", error);
+      setSnackbarMessage("Error saving user.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
-    setNewUser({ username: "", email: "", role: "" });
-    setEditingUser(null);
-    setOpen(false);
+  };
+
+  const handleDelete = async (user) => {
+    // Display a confirmation alert before proceeding with deletion
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete ${user.name}?`
+    );
+
+    if (isConfirmed) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(
+          `http://localhost:8000/api/pengelola/admin/auth/deletePengelola/${user.id_pengelola}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUsers(users.filter((u) => u.id_pengelola !== user.id_pengelola));
+        setSnackbarMessage("User deleted successfully!");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        setSnackbarMessage("Error deleting user.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
+    }
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
   };
 
   return (
@@ -105,8 +195,7 @@ const PengelolaTable = () => {
           fullWidth
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4" // Existing margin
-          style={{ marginBottom: "1rem" }} // Additional margin
+          className="mb-4"
         />
 
         <div className="overflow-x-auto">
@@ -114,18 +203,22 @@ const PengelolaTable = () => {
             <thead>
               <tr className="bg-gray-200 text-gray-700 border-b">
                 <th
-                  onClick={() => toggleSortOrder("id")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  ID{" "}
-                  {sortColumn === "id" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th
                   onClick={() => toggleSortOrder("username")}
                   className="p-3 text-left cursor-pointer"
                 >
                   Username{" "}
                   {sortColumn === "username"
+                    ? sortOrder === "asc"
+                      ? "▲"
+                      : "▼"
+                    : ""}
+                </th>
+                <th
+                  onClick={() => toggleSortOrder("name")}
+                  className="p-3 text-left cursor-pointer"
+                >
+                  Name{" "}
+                  {sortColumn === "name"
                     ? sortOrder === "asc"
                       ? "▲"
                       : "▼"
@@ -144,23 +237,23 @@ const PengelolaTable = () => {
                 </th>
                 <th
                   onClick={() => toggleSortOrder("role")}
-                  className="p-3 text-left cursor-pointer" 
+                  className="p-3 text-left cursor-pointer"
                 >
                   Role{" "}
                   {sortColumn === "role"
                     ? sortOrder === "asc"
                       ? "▲"
                       : "▼"
-                    : ""} 
+                    : ""}
                 </th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               {currentUsers.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{user.id}</td>
+                <tr key={user.username} className="border-b hover:bg-gray-50">
                   <td className="p-3">{user.username}</td>
+                  <td className="p-3">{user.name}</td>
                   <td className="p-3">{user.email}</td>
                   <td className="p-3">{user.role}</td>
                   <td className="p-3">
@@ -171,9 +264,7 @@ const PengelolaTable = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() =>
-                        setUsers(users.filter((u) => u.id !== user.id))
-                      }
+                      onClick={() => handleDelete(user)}
                       className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
                     >
                       Delete
@@ -223,6 +314,17 @@ const PengelolaTable = () => {
           </div>
         </div>
 
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+
         <Dialog open={open} onClose={() => setOpen(false)}>
           <DialogTitle>
             {editingUser ? "Edit User" : "Add New User"}
@@ -232,17 +334,25 @@ const PengelolaTable = () => {
               label="Username"
               variant="outlined"
               fullWidth
-              margin="normal" // Add margin here
+              margin="normal"
               value={newUser.username}
               onChange={(e) =>
                 setNewUser({ ...newUser, username: e.target.value })
               }
             />
             <TextField
+              label="Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+            />
+            <TextField
               label="Email"
               variant="outlined"
               fullWidth
-              margin="normal" // Add margin here
+              margin="normal"
               value={newUser.email}
               onChange={(e) =>
                 setNewUser({ ...newUser, email: e.target.value })
@@ -252,13 +362,13 @@ const PengelolaTable = () => {
               label="Role"
               variant="outlined"
               fullWidth
-              margin="normal" // Add margin here
+              margin="normal"
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpen(false)} color="primary">
+            <Button onClick={() => setOpen(false)} color="secondary">
               Cancel
             </Button>
             <Button onClick={handleSave} color="primary">

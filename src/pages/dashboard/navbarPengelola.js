@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEnvelope,
   faSignOutAlt,
   faChevronDown,
   faTicketAlt,
@@ -11,7 +10,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -21,9 +26,8 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
   const dummyProfile = {
-    name: "Vita",
-    role: "Operator",
-    image: "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj",
+    image:
+      "https://yt3.googleusercontent.com/IglBCbUNoIFszl5F_wpbuKxEaK4_xvGHWljhZBZVrb4bc262L6v9OEC6jPyTyMtLT5o1G9pP=s900-c-k-c0x00ffffff-no-rj",
   };
 
   const toggleDropdown = () => {
@@ -121,47 +125,54 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-
           {/* User Profile */}
-          <div className="flex items-center relative dropdown-container">
-            <div className="flex items-center">
-              <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">{userProfile ? userProfile.name : dummyProfile.name}</p>
-                <p className="text-sm text-right">{userProfile ? userProfile.role : dummyProfile.role}</p>
+          {userProfile ? (
+            <div className="flex items-center relative dropdown-container">
+              <div className="flex items-center">
+                <div className="ml-5 mr-2 text-black-600">
+                  <p className="font-semibold">
+                    {userProfile ? userProfile.name : dummyProfile.name}
+                  </p>
+                  <p className="text-sm text-right">
+                    {userProfile ? userProfile.role : dummyProfile.role}
+                  </p>
+                </div>
+                <img
+                  src={userProfile?.image || dummyProfile.image}
+                  alt="User"
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                  onClick={openProfileModal}
+                />
+                <button
+                  className="ml-2 text-gray-600 focus:outline-none"
+                  onClick={toggleDropdown}
+                >
+                  <FontAwesomeIcon icon={faChevronDown} />
+                </button>
               </div>
-              <img
-                src={userProfile?.image || dummyProfile.image}
-                alt="User"
-                className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                onClick={openProfileModal}
-              />
-              <button
-                className="ml-2 text-gray-600 focus:outline-none"
-                onClick={toggleDropdown}
-              >
-                <FontAwesomeIcon icon={faChevronDown} />
-              </button>
+              {dropdownOpen && (
+                <div
+                  className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                  aria-hidden={!dropdownOpen}
+                >
+                  <ul className="py-2">
+                    <li
+                      className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      <FontAwesomeIcon
+                        icon={faSignOutAlt}
+                        className="mr-2 text-gray-600"
+                      />
+                      Log Out
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                aria-hidden={!dropdownOpen}
-              >
-                <ul className="py-2">
-                  <li
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    <FontAwesomeIcon
-                      icon={faSignOutAlt}
-                      className="mr-2 text-gray-600"
-                    />
-                    Log Out
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+          ) : (
+            <p>Loading...</p>
+          )}
         </div>
       </div>
 
@@ -221,7 +232,9 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
             <Link
               to="/message"
-              className={`ml-3 ${location.pathname === "/message" ? "font-semibold" : ""}`}
+              className={`ml-3 ${
+                location.pathname === "/message" ? "font-semibold" : ""
+              }`}
             >
               Message
             </Link>
@@ -240,8 +253,12 @@ const CombinedNavbarSidebarOperator = ({ sidebarOpen, setSidebarOpen }) => {
               className="w-32 h-32 rounded-full object-cover mr-4"
             />
             <div>
-              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
-              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+              <p className="text-xl font-bold">
+                {userProfile?.name || dummyProfile.name}
+              </p>
+              <p className="text-l text-gray-500">
+                {userProfile?.role || dummyProfile.role}
+              </p>
             </div>
           </div>
         </DialogContent>
