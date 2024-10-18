@@ -165,6 +165,8 @@ const TicketPimpinan = () => {
     const params = new URLSearchParams();
     if (startDate) params.append("start_date", startDate);
     if (endDate) params.append("end_date", endDate);
+    if (filter !== "All") params.append("status", filter);
+    if (searchQuery) params.append("search", searchQuery);
   
     try {
       const response = await fetch(
