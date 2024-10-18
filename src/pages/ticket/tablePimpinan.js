@@ -158,6 +158,38 @@ const TicketPimpinan = () => {
   const startIdx = (currentPage - 1) * maxRows;
   const paginatedTickets = filteredTickets.slice(startIdx, startIdx + maxRows);
 
+  // Function to fetch PDF
+  const fetchPdf = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/pengelola/pemimpin/ticket/getPdf?start_date=${startDate}&end_date=${endDate}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ticket.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        console.error("Failed to fetch PDF:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+    }
+  };
+
   return (
     <div>
       <div className="w-full bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
@@ -228,6 +260,16 @@ const TicketPimpinan = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             >
               Clear All Filters
+            </button>
+          </div>
+
+          {/* Generate PDF Button */}
+          <div>
+            <button
+              onClick={fetchPdf}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              Generate PDF
             </button>
           </div>
         </div>
