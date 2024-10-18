@@ -42,6 +42,7 @@ export default function SignInSide() {
   React.useEffect(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
+    localStorage.removeItem("role");
   }, []);
 
   const handleSubmit = async (event) => {
@@ -81,7 +82,9 @@ export default function SignInSide() {
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("userId", id);
-          
+          // Remove role from local storage here only if necessary, but you can skip it
+          // localStorage.removeItem("role");
+
           if (id.length === 12) {
             // For a user, navigate to /form directly
             navigate("/form");
@@ -93,8 +96,11 @@ export default function SignInSide() {
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            const role = roleResponse.data.role;
-            switch (role) {
+            const fetchedRole = roleResponse.data.role; // Rename to avoid confusion
+            localStorage.setItem("role", fetchedRole); // Store fetched role in local storage
+            console.log(fetchedRole); // Check what is being fetched
+
+            switch (fetchedRole) {
               case "operator":
                 navigate("/dashboardpengelola");
                 break;

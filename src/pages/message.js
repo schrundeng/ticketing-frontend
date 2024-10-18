@@ -280,7 +280,7 @@ const Message = () => {
             <button
               type="button"
               onClick={() => fileInputRef.current.click()} // Open file dialog
-              className="flex items-center justify-center p-2 border border-gray-300 rounded-l-lg bg-gray-100 hover:bg-gray-200"
+              className="flex items-center justify-center p-4 border border-gray-300 rounded-l-lg bg-gray-100 hover:bg-gray-200"
             >
               <FontAwesomeIcon icon={faPaperclip} className="text-gray-600" />
             </button>
