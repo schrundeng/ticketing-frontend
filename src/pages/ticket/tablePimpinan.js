@@ -161,10 +161,14 @@ const TicketPimpinan = () => {
   // Function to fetch PDF
   const fetchPdf = async () => {
     const token = localStorage.getItem("token");
-
+  
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+  
     try {
       const response = await fetch(
-        `http://localhost:8000/api/pengelola/pemimpin/ticket/getPdf?start_date=${startDate}&end_date=${endDate}`,
+        `http://localhost:8000/api/pengelola/pemimpin/ticket/getPdf?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -172,7 +176,7 @@ const TicketPimpinan = () => {
           },
         }
       );
-
+  
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
