@@ -10,7 +10,13 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -20,9 +26,8 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
 
   const dummyProfile = {
-    name: "John Doe",
-    role: "Pimpinan",
-    image: "https://scontent.fsub8-1.fna.fbcdn.net/v/t39.30808-1/450918471_1611791953003677_1362261108658263955_n.jpg?stp=dst-jpg_s200x200&_nc_cat=100&ccb=1-7&_nc_sid=50d2ac&_nc_eui2=AeGIN5bV-gI9x-wd2_o-bQKElFqQ7BrYiXiUWpDsGtiJeGVwV-c93Uzf-zfhRTEQVVahNETguPT7RLloyoQge2cM&_nc_ohc=eUiAucgd5jgQ7kNvgEonnQu&_nc_zt=24&_nc_ht=scontent.fsub8-1.fna&_nc_gid=AEM3N45WK8-008nR9IetiMZ&oh=00_AYAOATfHoa00UpK2_ARfnzE2dtl93lBRe0b3ubnCCN3pFA&oe=6713AFB3", // Update to actual image URL
+    image:
+      "https://scontent.fsub8-1.fna.fbcdn.net/v/t39.30808-1/450918471_1611791953003677_1362261108658263955_n.jpg?stp=dst-jpg_s200x200&_nc_cat=100&ccb=1-7&_nc_sid=50d2ac&_nc_eui2=AeGIN5bV-gI9x-wd2_o-bQKElFqQ7BrYiXiUWpDsGtiJeGVwV-c93Uzf-zfhRTEQVVahNETguPT7RLloyoQge2cM&_nc_ohc=eUiAucgd5jgQ7kNvgEonnQu&_nc_zt=24&_nc_ht=scontent.fsub8-1.fna&_nc_gid=AEM3N45WK8-008nR9IetiMZ&oh=00_AYAOATfHoa00UpK2_ARfnzE2dtl93lBRe0b3ubnCCN3pFA&oe=6713AFB3", // Update to actual image URL
   };
 
   const toggleDropdown = () => {
@@ -120,47 +125,54 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Right Side: User Info and Icons */}
         <div className="flex items-center space-x-4 ml-auto">
-
           {/* User Profile */}
-          <div className="flex items-center relative dropdown-container">
-            <div className="flex items-center">
-              <div className="ml-5 mr-2 text-black-600">
-                <p className="font-semibold">{userProfile ? userProfile.name : dummyProfile.name}</p>
-                <p className="text-sm text-right">{userProfile ? userProfile.role : dummyProfile.role}</p>
+          {userProfile ? (
+            <div className="flex items-center relative dropdown-container">
+              <div className="flex items-center">
+                <div className="ml-5 mr-2 text-black-600">
+                  <p className="font-semibold">
+                    {userProfile ? userProfile.name : dummyProfile.name}
+                  </p>
+                  <p className="text-sm text-right">
+                    {userProfile ? userProfile.role : dummyProfile.role}
+                  </p>
+                </div>
+                <img
+                  src={userProfile?.image || dummyProfile.image}
+                  alt="User"
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                  onClick={openProfileModal}
+                />
+                <button
+                  className="ml-2 text-gray-600 focus:outline-none"
+                  onClick={toggleDropdown}
+                >
+                  <FontAwesomeIcon icon={faChevronDown} />
+                </button>
               </div>
-              <img
-                src={userProfile?.image || dummyProfile.image}
-                alt="User"
-                className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                onClick={openProfileModal}
-              />
-              <button
-                className="ml-2 text-gray-600 focus:outline-none"
-                onClick={toggleDropdown}
-              >
-                <FontAwesomeIcon icon={faChevronDown} />
-              </button>
+              {dropdownOpen && (
+                <div
+                  className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                  aria-hidden={!dropdownOpen}
+                >
+                  <ul className="py-2">
+                    <li
+                      className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      <FontAwesomeIcon
+                        icon={faSignOutAlt}
+                        className="mr-2 text-gray-600"
+                      />
+                      Log Out
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
-            {dropdownOpen && (
-              <div
-                className="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                aria-hidden={!dropdownOpen}
-              >
-                <ul className="py-2">
-                  <li
-                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleLogout}
-                  >
-                    <FontAwesomeIcon
-                      icon={faSignOutAlt}
-                      className="mr-2 text-gray-600"
-                    />
-                    Log Out
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
+          ) : (
+            <p>Loading...</p>
+          )}
         </div>
       </div>
 
@@ -220,7 +232,9 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
             <Link
               to="/ticketpimpinan"
-              className={`ml-3 ${location.pathname === "/ticketpimpinan" ? "font-semibold" : ""}`}
+              className={`ml-3 ${
+                location.pathname === "/ticketpimpinan" ? "font-semibold" : ""
+              }`}
             >
               Ticket
             </Link>
@@ -239,8 +253,12 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
               className="w-32 h-32 rounded-full object-cover mr-4"
             />
             <div>
-              <p className="text-xl font-bold">{userProfile?.name || dummyProfile.name}</p>
-              <p className="text-l text-gray-500">{userProfile?.role || dummyProfile.role}</p>
+              <p className="text-xl font-bold">
+                {userProfile?.name || dummyProfile.name}
+              </p>
+              <p className="text-l text-gray-500">
+                {userProfile?.role || dummyProfile.role}
+              </p>
             </div>
           </div>
         </DialogContent>
