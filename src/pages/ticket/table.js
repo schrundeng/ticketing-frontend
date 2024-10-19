@@ -83,7 +83,6 @@ const TicketTable = () => {
     const token = localStorage.getItem("token");
     const ticketId = editingTicket.id;
     const statusUrlMap = {
-      Pending: `http://localhost:8000/api/pengelola/operator/ticket/assignTicket/${ticketId}`,
       "In Progress": `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`,
       Resolved: `http://localhost:8000/api/pengelola/operator/ticket/completeTicket/${ticketId}`,
     };
@@ -444,7 +443,6 @@ const TicketTable = () => {
                     }
                     className="border rounded-md p-2 w-full"
                   >
-                    <option value="Pending">Pending</option>
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                   </select>
