@@ -32,24 +32,13 @@ const TicketPimpinan = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          const fetchedTickets = data.ticket.map((ticket) => {
-            // Parse the date and format it
-            const date = new Date(ticket.date_created);
-            const formattedDate = `${date
-              .getDate()
-              .toString()
-              .padStart(2, "0")}/${(date.getMonth() + 1)
-              .toString()
-              .padStart(2, "0")}/${date.getFullYear()}`;
-
-            return {
-              id: ticket.id_ticket,
-              date: formattedDate, // Use the formatted date here
-              user: ticket.id_user,
-              issue: ticket.description,
-              status: ticket.status_note,
-            };
-          });
+          const fetchedTickets = data.ticket.map((ticket) => ({
+            id: ticket.id_ticket,
+            date: ticket.date_created.split(" ")[0],
+            user: ticket.id_user,
+            issue: ticket.description,
+            status: ticket.status_note,
+          }));
           setTickets(fetchedTickets);
         } else {
           console.error("Failed to fetch tickets:", data.message);
@@ -62,7 +51,7 @@ const TicketPimpinan = () => {
     };
 
     fetchTickets();
-  }, []); // Ensure you call fetchTickets when the component mounts
+  }, []);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -135,8 +124,7 @@ const TicketPimpinan = () => {
     })
     .sort((a, b) => {
       const getValue = (ticket, column) => {
-        if (column === "date")
-          return new Date(ticket.date.split("/").reverse().join("-")); // Convert formatted date to Date object
+        if (column === "date") return new Date(ticket.date);
         if (column === "user" || column === "issue")
           return ticket[column].toLowerCase();
         return ticket[column];
@@ -157,42 +145,6 @@ const TicketPimpinan = () => {
   const totalPages = Math.ceil(filteredTickets.length / maxRows);
   const startIdx = (currentPage - 1) * maxRows;
   const paginatedTickets = filteredTickets.slice(startIdx, startIdx + maxRows);
-
-  // Function to fetch PDF
-  const fetchPdf = async () => {
-    const token = localStorage.getItem("token");
-  
-    const params = new URLSearchParams();
-    if (startDate) params.append("start_date", startDate);
-    if (endDate) params.append("end_date", endDate);
-  
-    try {
-      const response = await fetch(
-        `http://localhost:8000/api/pengelola/pemimpin/ticket/getPdf?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "ticket.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } else {
-        console.error("Failed to fetch PDF:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching PDF:", error);
-    }
-  };
 
   return (
     <div>
@@ -264,16 +216,6 @@ const TicketPimpinan = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             >
               Clear All Filters
-            </button>
-          </div>
-
-          {/* Generate PDF Button */}
-          <div>
-            <button
-              onClick={fetchPdf}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-            >
-              Generate PDF
             </button>
           </div>
         </div>

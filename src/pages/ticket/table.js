@@ -42,24 +42,13 @@ const TicketTable = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          const fetchedTickets = data.ticket.map((ticket) => {
-            // Parse the date and format it
-            const date = new Date(ticket.date_created);
-            const formattedDate = `${date
-              .getDate()
-              .toString()
-              .padStart(2, "0")}/${(date.getMonth() + 1)
-              .toString()
-              .padStart(2, "0")}/${date.getFullYear()}`;
-
-            return {
-              id: ticket.id_ticket,
-              date: formattedDate, // Use the formatted date here
-              user: ticket.id_user,
-              issue: ticket.description,
-              status: ticket.status_note,
-            };
-          });
+          const fetchedTickets = data.ticket.map((ticket) => ({
+            id: ticket.id_ticket,
+            date: ticket.date_created.split(" ")[0],
+            user: ticket.id_user,
+            issue: ticket.description,
+            status: ticket.status_note,
+          }));
           setTickets(fetchedTickets);
         } else {
           console.error("Failed to fetch tickets:", data.message);
@@ -72,7 +61,7 @@ const TicketTable = () => {
     };
 
     fetchTickets();
-  }, []); // Ensure you call fetchTickets when the component mounts
+  }, []);
 
   const handleOpen = (ticket) => {
     setEditingTicket(ticket);
@@ -93,11 +82,37 @@ const TicketTable = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     const ticketId = editingTicket.id;
-    const statusUrlMap = {
-      "In Progress": `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`,
-      Resolved: `http://localhost:8000/api/pengelola/operator/ticket/completeTicket/${ticketId}`,
-    };
-    const apiUrl = statusUrlMap[editingTicket.status];
+
+    let apiUrl;
+    let updatedStatus;
+
+    // Determine the API URL and updated status based on the selected option
+    switch (editingTicket.status) {
+      case "Undo In Progress":
+        apiUrl = `http://localhost:8000/api/pengelola/operator/ticket/rollbackPending/${ticketId}`;
+        updatedStatus = "Pending"; // Set the status to Pending
+        break;
+      case "Undo Resolved":
+        apiUrl = `http://localhost:8000/api/pengelola/operator/ticket/rollbackOngoing/${ticketId}`;
+        updatedStatus = "In Progress"; // Set the status to In Progress
+        break;
+      case "In Progress":
+        apiUrl = `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`;
+        updatedStatus = "In Progress"; // No change in status
+        break;
+      case "Resolved":
+        apiUrl = `http://localhost:8000/api/pengelola/operator/ticket/completeTicket/${ticketId}`;
+        updatedStatus = "Resolved"; // No change in status
+        break;
+      default:
+        // If status is Pending, change it to In Progress
+        apiUrl = `http://localhost:8000/api/pengelola/operator/ticket/startTicket/${ticketId}`;
+        updatedStatus = "In Progress";
+        break;
+    }
+
+    // Debugging the resolved API URL
+    console.log("API URL:", apiUrl);
 
     try {
       const response = await fetch(apiUrl, {
@@ -115,7 +130,7 @@ const TicketTable = () => {
             ticket.id === editingTicket.id
               ? {
                   ...ticket,
-                  status: editingTicket.status,
+                  status: updatedStatus, // Use updatedStatus here
                   ticket_note: editingTicket.ticket_note,
                 }
               : ticket
@@ -182,19 +197,8 @@ const TicketTable = () => {
   );
 
   const sortedTickets = [...filteredTickets].sort((a, b) => {
-    if (sortColumn === "date") {
-      const dateA = new Date(a.date.split("/").reverse().join("-")); // Convert to YYYY-MM-DD for proper comparison
-      const dateB = new Date(b.date.split("/").reverse().join("-"));
-      return sortOrder === "asc" ? dateA - dateB : dateB - dateA; // Ascending or descending order
-    } else {
-      return sortOrder === "asc"
-        ? a[sortColumn] > b[sortColumn]
-          ? 1
-          : -1
-        : a[sortColumn] < b[sortColumn]
-        ? 1
-        : -1;
-    }
+    if (sortOrder === "asc") return a[sortColumn] > b[sortColumn] ? 1 : -1;
+    return a[sortColumn] < b[sortColumn] ? 1 : -1;
   });
 
   const totalPages = Math.ceil(sortedTickets.length / maxRows);
