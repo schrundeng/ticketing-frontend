@@ -7,6 +7,7 @@ import {
   faBars,
   faTachometerAlt,
   faTimes,
+  faClipboardList,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -220,6 +221,7 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
               Dashboard
             </Link>
           </li>
+
           <li
             className={`mb-4 p-1 flex items-center ${
               location.pathname === "/ticketpimpinan"
@@ -237,6 +239,28 @@ const CombinedNavbarSidebarPimpinan = ({ sidebarOpen, setSidebarOpen }) => {
               }`}
             >
               Ticket
+            </Link>
+          </li>
+
+          {/* New Absen Route */}
+          <li
+            className={`mb-4 p-1 flex items-center ${
+              location.pathname === "/absenpengelola"
+                ? "bg-[#213751] text-white rounded-lg"
+                : ""
+            }`}
+          >
+            <button className="h-8 w-8 flex items-center justify-center focus:outline-none">
+              <FontAwesomeIcon icon={faClipboardList} size="lg" />{" "}
+              {/* New Icon */}
+            </button>
+            <Link
+              to="/absenpengelola"
+              className={`ml-3 ${
+                location.pathname === "/absenpengelola" ? "font-semibold" : ""
+              }`}
+            >
+              Absen Pengelola
             </Link>
           </li>
         </ul>

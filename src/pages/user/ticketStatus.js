@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import NavbarUser from "./navbarUser.js";
 import axios from "axios";
-import { Alert, Skeleton } from "@mui/material"; // Import Skeleton
+import { Skeleton } from "@mui/material"; // Import Skeleton
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons"; // Import the clock-rotate-left icon
 import { useNavigate } from "react-router-dom"; // Import useNavigate
