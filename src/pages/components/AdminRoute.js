@@ -1,13 +1,7 @@
-// AdminRoute.js
-import React from "react";
-import { Navigate } from "react-router-dom";
+import RoleRoute from "./RoleRoute";
 
 const AdminRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role"); // Assuming you store the role in localStorage
-
-  // If token exists and role is admin, allow access to the protected page
-  return token && role === "admin" ? children : <Navigate to="/" />;
+  return <RoleRoute requiredRole="admin">{children}</RoleRoute>;
 };
 
 export default AdminRoute;

@@ -35,7 +35,10 @@ const TicketHistory = () => {
         );
 
         if (ticketsResponse.status === 200) {
-          setTickets(ticketsResponse.data.tickets);
+          const sortedTickets = ticketsResponse.data.tickets.sort(
+            (a, b) => new Date(b.date_created) - new Date(a.date_created)
+          );
+          setTickets(sortedTickets);
         } else {
           setError("Failed to fetch tickets.");
         }
@@ -136,22 +139,22 @@ const TicketHistory = () => {
             <div className="overflow-y-auto" style={{ Height: "50vh" }}>
               <Skeleton
                 variant="rectangular"
-                height={300}
+                height={370}
                 style={{ marginBottom: 16 }}
               />
               <Skeleton
                 variant="rectangular"
-                height={300}
+                height={370}
                 style={{ marginBottom: 16 }}
               />
               <Skeleton
                 variant="rectangular"
-                height={300}
+                height={370}
                 style={{ marginBottom: 16 }}
               />
               <Skeleton
                 variant="rectangular"
-                height={300}
+                height={370}
                 style={{ marginBottom: 16 }}
               />
             </div>
@@ -177,6 +180,13 @@ const TicketHistory = () => {
                     Description:
                   </label>
                   <p className="text-gray-800">{ticket.description}</p>
+                </div>
+
+                <div className="mb-2">
+                  <label className="block text-gray-700 text-sm font-bold mb-1">
+                    Date:
+                  </label>
+                  <p className="text-gray-800">{ticket.updated_at}</p>
                 </div>
 
                 <div className="mb-2">
