@@ -44,7 +44,7 @@ const TicketTable = () => {
         if (data.status === "success") {
           const fetchedTickets = data.ticket.map((ticket) => {
             // Parse the date and format it
-            const date = new Date(ticket.updated_at);
+            const date = new Date(ticket.date_created);
             const formattedDate = `${date
               .getDate()
               .toString()
