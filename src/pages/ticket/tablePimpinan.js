@@ -180,6 +180,8 @@ const TicketPimpinan = () => {
     const params = new URLSearchParams();
     if (startDate) params.append("start_date", startDate);
     if (endDate) params.append("end_date", endDate);
+    if (filter !== "All") params.append("status", filter);
+    if (searchQuery) params.append("search", searchQuery);
 
     try {
       const response = await fetch(
@@ -208,7 +210,6 @@ const TicketPimpinan = () => {
       console.error("Error fetching PDF:", error);
     }
   };
-
 
   return (
     <div>
@@ -246,10 +247,7 @@ const TicketPimpinan = () => {
 
           {/* Date Range Filters */}
           <div>
-            <label
-              htmlFor="startDate"
-              className="mr-2 font-medium text-gray-700"
-            >
+            <label htmlFor="startDate" className="mr-2 font-medium text-gray-700">
               Start Date:
             </label>
             <input
@@ -280,6 +278,16 @@ const TicketPimpinan = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             >
               Clear All Filters
+            </button>
+          </div>
+
+          {/* Generate PDF Button */}
+          <div>
+            <button
+              onClick={fetchPdf}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+            >
+              Generate PDF
             </button>
           </div>
         </div>
