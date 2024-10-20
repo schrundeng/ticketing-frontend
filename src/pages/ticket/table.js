@@ -471,6 +471,8 @@ const TicketTable = () => {
                   >
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
+                    <option value="Undo Resolved">Undo Resolved</option>
+                    <option value="Undo In Progress">Undo In Progress</option>
                   </select>
                 </div>
                 <div className="mb-4">
