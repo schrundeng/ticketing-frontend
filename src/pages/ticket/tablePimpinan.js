@@ -34,24 +34,13 @@ const TicketPimpinan = () => {
 
         const data = await response.json();
         if (data.status === "success") {
-          const fetchedTickets = data.ticket.map((ticket) => {
-            // Parse the date and format it
-            const date = new Date(ticket.updated_at);
-            const formattedDate = `${date
-              .getDate()
-              .toString()
-              .padStart(2, "0")}/${(date.getMonth() + 1)
-              .toString()
-              .padStart(2, "0")}/${date.getFullYear()}`;
-
-            return {
-              id: ticket.id_ticket,
-              date: formattedDate, // Use the formatted date here
-              user: ticket.id_user,
-              issue: ticket.description,
-              status: ticket.status_note,
-            };
-          });
+          const fetchedTickets = data.ticket.map((ticket) => ({
+            id: ticket.id_ticket,
+            date: ticket.date_created.split(" ")[0],
+            user: ticket.id_user,
+            issue: ticket.description,
+            status: ticket.status_note,
+          }));
           setTickets(fetchedTickets);
         } else {
           console.error("Failed to fetch tickets:", data.message);
@@ -64,7 +53,7 @@ const TicketPimpinan = () => {
     };
 
     fetchTickets();
-  }, []); // Ensure you call fetchTickets when the component mounts
+  }, []);
 
   const fetchTicketDetails = async (ticketId) => {
     const token = localStorage.getItem("token");
@@ -162,8 +151,7 @@ const TicketPimpinan = () => {
     })
     .sort((a, b) => {
       const getValue = (ticket, column) => {
-        if (column === "date")
-          return new Date(ticket.date.split("/").reverse().join("-")); // Convert formatted date to Date object
+        if (column === "date") return new Date(ticket.date);
         if (column === "user" || column === "issue")
           return ticket[column].toLowerCase();
         return ticket[column];
@@ -220,6 +208,7 @@ const TicketPimpinan = () => {
       console.error("Error fetching PDF:", error);
     }
   };
+
 
   return (
     <div>
@@ -291,16 +280,6 @@ const TicketPimpinan = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             >
               Clear All Filters
-            </button>
-          </div>
-
-          {/* Generate PDF Button */}
-          <div>
-            <button
-              onClick={fetchPdf}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-            >
-              Generate PDF
             </button>
           </div>
         </div>
