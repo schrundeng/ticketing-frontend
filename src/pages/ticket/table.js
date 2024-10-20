@@ -23,6 +23,8 @@ const TicketTable = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [loading, setLoading] = useState(true);
+  const [ticketDetails, setTicketDetails] = useState(null); // State for selected ticket details
+  const [detailModalOpen, setDetailModalOpen] = useState(false); // State for detail modal
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -73,6 +75,31 @@ const TicketTable = () => {
 
     fetchTickets();
   }, []); // Ensure you call fetchTickets when the component mounts
+
+  const fetchTicketDetails = async (ticketId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/pengelola/ticket/getTicketId/${ticketId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setTicketDetails(data.ticket); // Store the ticket details
+        setDetailModalOpen(true); // Open the detail modal
+      } else {
+        console.error("Failed to fetch ticket details:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching ticket details:", error);
+    }
+  };
 
   const handleOpen = (ticket) => {
     setEditingTicket(ticket);
@@ -386,6 +413,12 @@ const TicketTable = () => {
                     </td>
                     <td className="p-3">
                       <button
+                        onClick={() => fetchTicketDetails(ticket.id)}
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 mr-2"
+                      >
+                        Detail
+                      </button>
+                      <button
                         onClick={() => handleOpen(ticket)}
                         className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                       >
@@ -443,6 +476,60 @@ const TicketTable = () => {
             </button>
           </div>
         </div>
+
+        {detailModalOpen && ticketDetails && (
+          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal-content bg-white p-6 rounded-lg shadow-lg w-1/4">
+              <h2 className="text-xl font-bold mb-4">Ticket Details</h2>
+              <p>
+                <strong>ID:</strong> {ticketDetails.id_ticket}
+              </p>
+              <p>
+                <strong>User ID:</strong> {ticketDetails.id_user}
+              </p>
+              <p>
+                <strong>Description:</strong> {ticketDetails.description}
+              </p>
+              <p>
+                <strong>Status:</strong> {ticketDetails.status_note}
+              </p>
+              <p>
+                <strong>Created At:</strong>{" "}
+                {new Date(ticketDetails.created_at).toLocaleString()}
+              </p>
+              <p>
+                <strong>Updated At:</strong>{" "}
+                {new Date(ticketDetails.updated_at).toLocaleString()}
+              </p>
+
+              <h3 className="font-bold mt-4">Details:</h3>
+              <ul>
+                {ticketDetails.detail.map((detail) => (
+                  <li key={detail.id_detail_ticket}>
+                    <p>
+                      <strong>Detail ID:</strong> {detail.id_detail_ticket}
+                    </p>
+                    <p>
+                      <strong>Date Created:</strong>{" "}
+                      {new Date(detail.date_created).toLocaleString()}
+                    </p>
+                    <p>
+                      <strong>Note:</strong>{" "}
+                      {detail.ticket_note || "No notes yet."}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => setDetailModalOpen(false)}
+                className="bg-gray-300 px-4 py-2 rounded-md mt-4"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Modal for Editing Ticket */}
         {open && (
