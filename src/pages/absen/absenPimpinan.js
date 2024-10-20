@@ -98,12 +98,12 @@ const AbsenPimpinan = () => {
   const filteredAbsens = absens.filter((absen) => {
     const loginDate = new Date(absen.loginDate);
     const generalFilter =
-      absen.id.toString().includes(filter) ||
-      absen.idPengelola.toString().includes(filter) ||
-      absen.loginDate.includes(filter) ||
-      absen.logoutDate.includes(filter) ||
-      absen.status.toLowerCase().includes(filter.toLowerCase()) ||
-      absen.name.toLowerCase().includes(filter.toLowerCase());
+      absen.id?.toString().includes(filter) ||
+      absen.idPengelola?.toString().includes(filter) ||
+      absen.loginDate?.includes(filter) ||
+      absen.logoutDate?.includes(filter) ||
+      absen.status?.toLowerCase().includes(filter.toLowerCase()) ||
+      absen.name?.toLowerCase().includes(filter.toLowerCase());
 
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
@@ -129,6 +129,43 @@ const AbsenPimpinan = () => {
     setEndDate("");
     setSortConfig({ key: "loginDate", direction: "descending" });
     setCurrentPage(1); // Reset to first page
+  };
+
+  // Function to fetch PDF
+  const fetchAbsenPdf = async () => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+    if (filter) params.append("search", filter);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/pengelola/pemimpin/absen/getPengelolaAbsenPdf?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "absen.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        console.error("Failed to fetch PDF:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+    }
   };
 
   return (
@@ -177,6 +214,16 @@ const AbsenPimpinan = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
             >
               Clear Filters
+            </button>
+          </div>
+
+          {/* Generate PDF Button */}
+          <div>
+            <button
+              onClick={fetchAbsenPdf}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+            >
+              Generate Absen PDF
             </button>
           </div>
         </div>
