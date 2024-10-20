@@ -10,6 +10,7 @@ import {
   Button,
 } from "@mui/material";
 import axios from "axios";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -33,10 +34,12 @@ const PengelolaTable = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [loading, setLoading] = useState(true);
 
   // Fetch user data from API
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("token"); // Retrieve token from local storage
         const response = await axios.get(
@@ -50,6 +53,8 @@ const PengelolaTable = () => {
         setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -198,83 +203,90 @@ const PengelolaTable = () => {
           className="mb-4"
         />
 
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse">
-            <thead>
-              <tr className="bg-gray-200 text-gray-700 border-b">
-                <th
-                  onClick={() => toggleSortOrder("username")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Username{" "}
-                  {sortColumn === "username"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
-                </th>
-                <th
-                  onClick={() => toggleSortOrder("name")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Name{" "}
-                  {sortColumn === "name"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
-                </th>
-                <th
-                  onClick={() => toggleSortOrder("email")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Email{" "}
-                  {sortColumn === "email"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
-                </th>
-                <th
-                  onClick={() => toggleSortOrder("role")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Role{" "}
-                  {sortColumn === "role"
-                    ? sortOrder === "asc"
-                      ? "▲"
-                      : "▼"
-                    : ""}
-                </th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentUsers.map((user) => (
-                <tr key={user.username} className="border-b hover:bg-gray-50">
-                  <td className="p-3">{user.username}</td>
-                  <td className="p-3">{user.name}</td>
-                  <td className="p-3">{user.email}</td>
-                  <td className="p-3">{user.role}</td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleOpen(user)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mr-2"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
+        {loading ? (
+          // Show loading spinner while fetching data
+          <div className="flex justify-center items-center mt-4">
+            <CircularProgress />
+          </div>
+        ) : (
+          <div className="overflow-x-auto mt-4">
+            <table className="w-full table-auto border-collapse">
+              <thead>
+                <tr className="bg-gray-200 text-gray-700 border-b">
+                  <th
+                    onClick={() => toggleSortOrder("username")}
+                    className="p-3 text-left cursor-pointer"
+                  >
+                    Username{" "}
+                    {sortColumn === "username"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                  <th
+                    onClick={() => toggleSortOrder("name")}
+                    className="p-3 text-left cursor-pointer"
+                  >
+                    Name{" "}
+                    {sortColumn === "name"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                  <th
+                    onClick={() => toggleSortOrder("email")}
+                    className="p-3 text-left cursor-pointer"
+                  >
+                    Email{" "}
+                    {sortColumn === "email"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                  <th
+                    onClick={() => toggleSortOrder("role")}
+                    className="p-3 text-left cursor-pointer"
+                  >
+                    Role{" "}
+                    {sortColumn === "role"
+                      ? sortOrder === "asc"
+                        ? "▲"
+                        : "▼"
+                      : ""}
+                  </th>
+                  <th className="p-3 text-left">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {currentUsers.map((user) => (
+                  <tr key={user.username} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{user.username}</td>
+                    <td className="p-3">{user.name}</td>
+                    <td className="p-3">{user.email}</td>
+                    <td className="p-3">{user.role}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => handleOpen(user)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mr-2"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Pagination Controls */}
         <div className="flex justify-between items-center mt-4">

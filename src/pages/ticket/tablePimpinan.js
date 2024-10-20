@@ -12,6 +12,8 @@ const TicketPimpinan = () => {
   const [maxRows, setMaxRows] = useState(5); // State for maximum rows displayed
   const [currentPage, setCurrentPage] = useState(1); // Current page
   const [loading, setLoading] = useState(true);
+  const [ticketDetails, setTicketDetails] = useState(null); // State for selected ticket details
+  const [detailModalOpen, setDetailModalOpen] = useState(false); // State for detail modal
 
   // Fetch ticket data from the API
   useEffect(() => {
@@ -52,6 +54,31 @@ const TicketPimpinan = () => {
 
     fetchTickets();
   }, []);
+
+  const fetchTicketDetails = async (ticketId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/pengelola/ticket/getTicketId/${ticketId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setTicketDetails(data.ticket); // Store the ticket details
+        setDetailModalOpen(true); // Open the detail modal
+      } else {
+        console.error("Failed to fetch ticket details:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching ticket details:", error);
+    }
+  };
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -145,6 +172,43 @@ const TicketPimpinan = () => {
   const totalPages = Math.ceil(filteredTickets.length / maxRows);
   const startIdx = (currentPage - 1) * maxRows;
   const paginatedTickets = filteredTickets.slice(startIdx, startIdx + maxRows);
+
+  // Function to fetch PDF
+  const fetchPdf = async () => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/pengelola/pemimpin/ticket/getPdf?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "ticket.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        console.error("Failed to fetch PDF:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+    }
+  };
+
 
   return (
     <div>
@@ -283,6 +347,9 @@ const TicketPimpinan = () => {
                       : "-"}
                   </span>
                 </th>
+                <th className="p-3 text-left cursor-pointer">
+                      Details
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -307,10 +374,72 @@ const TicketPimpinan = () => {
                       {ticket.status}
                     </span>
                   </td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => fetchTicketDetails(ticket.id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 mr-2"
+                    >
+                      Detail
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        )}
+
+        {detailModalOpen && ticketDetails && (
+          <div className="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="modal-content bg-white p-6 rounded-lg shadow-lg w-1/4">
+              <h2 className="text-xl font-bold mb-4">Ticket Details</h2>
+              <p>
+                <strong>ID:</strong> {ticketDetails.id_ticket}
+              </p>
+              <p>
+                <strong>User ID:</strong> {ticketDetails.id_user}
+              </p>
+              <p>
+                <strong>Description:</strong> {ticketDetails.description}
+              </p>
+              <p>
+                <strong>Status:</strong> {ticketDetails.status_note}
+              </p>
+              <p>
+                <strong>Created At:</strong>{" "}
+                {new Date(ticketDetails.created_at).toLocaleString()}
+              </p>
+              <p>
+                <strong>Updated At:</strong>{" "}
+                {new Date(ticketDetails.updated_at).toLocaleString()}
+              </p>
+
+              <h3 className="font-bold mt-4">Details:</h3>
+              <ul>
+                {ticketDetails.detail.map((detail) => (
+                  <li key={detail.id_detail_ticket}>
+                    <p>
+                      <strong>Detail ID:</strong> {detail.id_detail_ticket}
+                    </p>
+                    <p>
+                      <strong>Date Created:</strong>{" "}
+                      {new Date(detail.date_created).toLocaleString()}
+                    </p>
+                    <p>
+                      <strong>Note:</strong>{" "}
+                      {detail.ticket_note || "No notes available."}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => setDetailModalOpen(false)}
+                className="bg-gray-300 px-4 py-2 rounded-md mt-4"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         )}
 
         {/* Pagination Controls */}
