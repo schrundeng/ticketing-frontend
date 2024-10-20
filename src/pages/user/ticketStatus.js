@@ -131,7 +131,7 @@ const TicketStatus = () => {
         {loading ? (
           <div
             className="p-4 bg-white shadow-sm rounded-md"
-            style={{ height: "50vh", overflowY: "auto" }}
+            style={{ height: "40vh", overflowY: "auto" }}
           >
             {/* Skeleton Loader for Ticket Details */}
             <Skeleton variant="text" width="15%" height={40} />
@@ -142,9 +142,6 @@ const TicketStatus = () => {
             <Skeleton variant="text" width="70%" height={40} />
             <Skeleton variant="text" width="15%" height={40} />
             <Skeleton variant="text" width="50%" height={40} />
-            <Skeleton variant="text" width="18%" height={40} />
-            <Skeleton variant="text" width="55%" height={40} />
-            
           </div>
         ) : error ? (
           <div className="text-red-500 mb-4">{error}</div>
@@ -152,7 +149,7 @@ const TicketStatus = () => {
           ticket && (
             <div
               className="p-4 bg-white shadow-sm rounded-md"
-              style={{ height: "50vh", overflowY: "auto" }}
+              style={{ height: "40vh", overflowY: "auto" }}
             >
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -184,17 +181,10 @@ const TicketStatus = () => {
                 <p>{getStatusIcon(ticket.status)}</p>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Status Note:
-                </label>
-                <p className="text-gray-800">{ticket.status_note}</p>
-              </div>
-
               {/* Optionally display ticket details if needed */}
               {ticket.detail && ticket.detail.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold">Ticket Details:</h3>
+                  <h3 className="text-lg font-semibold">Solution:</h3>
                   {ticket.detail.map((item) => (
                     <div key={item.id_detail_ticket} className="mb-2">
                       <p className="text-gray-800">{item.ticket_note}</p>
