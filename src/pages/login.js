@@ -63,7 +63,32 @@ export default function SignInSide() {
             password: password,
           };
         } else if (id.length === 18) {
-          // Login as a pengelola
+          // Try to log in as a user first
+          apiUrl = "http://localhost:8000/api/loginUser";
+          requestBody = {
+            id_user: id,
+            password: password,
+          };
+
+          try {
+            const response = await axios.post(apiUrl, requestBody);
+            if (response.status === 200) {
+              localStorage.setItem("token", response.data.token);
+              localStorage.setItem("userId", id);
+              navigate("/form");
+              return; // Exit after successful login
+            }
+          } catch (error) {
+            if (error.response && error.response.status !== 401) {
+              // Handle error for loginUser
+              setError("Login as user failed. Please check your credentials.");
+              setLoading(false);
+              return;
+            }
+            // If user login fails, now try logging in as pengelola
+          }
+
+          // If user login fails, try logging in as pengelola
           apiUrl = "http://localhost:8000/api/loginPengelola";
           requestBody = {
             id_pengelola: id,
@@ -75,28 +100,25 @@ export default function SignInSide() {
           return;
         }
 
+        // If the ID length is 12, proceed to login directly with loginUser API
         const response = await axios.post(apiUrl, requestBody);
 
         if (response.status === 200) {
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("userId", id);
-          // Remove role from local storage here only if necessary, but you can skip it
-          // localStorage.removeItem("role");
 
           if (id.length === 12) {
-            // For a user, navigate to /form directly
             navigate("/form");
           } else {
-            // For a pengelola, fetch role and navigate accordingly
+            // For pengelola, fetch role and navigate accordingly
             const token = localStorage.getItem("token");
             const roleResponse = await axios.get(
               `http://localhost:8000/api/pengelola/auth/getDataPengelolaId/${id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            const fetchedRole = roleResponse.data.role; // Rename to avoid confusion
-            localStorage.setItem("role", fetchedRole); // Store fetched role in local storage
-            console.log(fetchedRole); // Check what is being fetched
+            const fetchedRole = roleResponse.data.role;
+            localStorage.setItem("role", fetchedRole);
 
             switch (fetchedRole) {
               case "operator":
@@ -109,7 +131,7 @@ export default function SignInSide() {
                 navigate("/dashboard");
                 break;
               default:
-                setError("Unknown role.");
+                navigate("/form");
             }
           }
         } else {
